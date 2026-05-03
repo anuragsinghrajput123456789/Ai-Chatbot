@@ -68,7 +68,25 @@ export const login = async (req, res, next) => {
         return res.json({
             token: createToken(user._id),
             username: user.username,
+            avatar: user.avatar || 'Bot'
         });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+export const updateAvatar = async (req, res, next) => {
+    try {
+        const { avatar } = req.body;
+        if (!avatar) return res.status(400).json({ error: 'Avatar is required' });
+
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        user.avatar = avatar;
+        await user.save();
+
+        return res.json({ message: 'Avatar updated successfully', avatar: user.avatar });
     } catch (err) {
         return next(err);
     }

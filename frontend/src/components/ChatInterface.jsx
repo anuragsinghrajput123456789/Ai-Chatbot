@@ -33,6 +33,15 @@ const ChatInterface = ({
         "Give me 5 creative project ideas",
     ];
 
+    const expertPrompts = [
+        { label: "General Expert", text: "Act as a senior expert with real-world experience. Give clear, practical answers. Focus on actionable steps, real examples, and avoid theory. Keep it concise and structured.\n\n" },
+        { label: "Coding Expert", text: "Act as a senior software engineer. Provide production-level solutions. Explain logic briefly, then give clean, optimized code. Highlight edge cases and best practices.\n\n" },
+        { label: "Career Coach", text: "Act as a hiring manager and career coach. Give direct, honest feedback. Optimize answers for selection. Focus on what recruiters actually look for.\n\n" },
+        { label: "Product Manager", text: "Act as a product manager with startup experience. Focus on user impact, growth, and practical execution. Suggest ideas that are simple and scalable.\n\n" },
+        { label: "Teacher", text: "Act as a teacher who explains complex topics simply. Break concepts into steps. Use examples and focus on what is important for exams or interviews.\n\n" },
+        { label: "Advanced Universal", text: "Act as a senior expert. Give concise, structured, and practical answers. Use bullet points. Focus on real-world application, examples, and step-by-step guidance. Avoid fluff and unnecessary explanations. Prioritize clarity and usefulness.\n\n" },
+    ];
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading, user]);
@@ -111,7 +120,7 @@ const ChatInterface = ({
                             </div>
                         </motion.div>
                     ) : (
-                        <div className="space-y-5 pb-4">
+                        <div className="mx-auto w-full max-w-3xl space-y-6 pb-8">
                             <AnimatePresence mode="popLayout">
                                 {messages.map((msg, idx) => (
                                     <motion.div
@@ -120,16 +129,10 @@ const ChatInterface = ({
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                                     >
-                                        <div className={`flex max-w-[92%] gap-3 sm:max-w-[78%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                                            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm sm:h-10 sm:w-10 ${msg.role === "user" ? "bg-gradient-to-br from-purple-500 to-pink-500 text-white" : "border border-slate-700 bg-slate-900 text-white"}`}>
-                                                {msg.role === "user" ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
-                                            </div>
-
-                                            <div className={`group/message relative overflow-hidden rounded-3xl border px-5 py-4 text-[15px] leading-relaxed sm:px-6 ${msg.role === "user"
-                                                ? "rounded-tr-sm border-purple-500/40 bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-[0_4px_20px_rgba(168,85,247,0.3)]"
-                                                : isDarkMode
-                                                    ? "rounded-tl-sm glass-panel-dark text-slate-200 shadow-md"
-                                                    : "rounded-tl-sm glass-panel text-slate-800 shadow-md"
+                                        <div className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                                            <div className={`group/message relative text-[15px] leading-relaxed ${msg.role === "user"
+                                                ? `max-w-[85%] sm:max-w-[75%] rounded-3xl px-5 py-3 text-left ${isDarkMode ? "bg-[#2f2f2f] text-slate-100" : "bg-slate-200 text-slate-800"}`
+                                                : `min-w-0 w-full pt-1 ${isDarkMode ? "text-slate-200" : "text-slate-800"}`
                                                 }`}
                                             >
                                                 {editingMessageId === msg._id ? (
@@ -146,16 +149,19 @@ const ChatInterface = ({
                                                                 code({ node, inline, className, children, ...props }) {
                                                                     const match = /language-(\w+)/.exec(className || "");
                                                                     return !inline && match ? (
-                                                                        <div className="relative group my-4 rounded-lg overflow-hidden border border-slate-700">
-                                                                           <div className="flex items-center justify-between px-4 py-1.5 bg-slate-800 text-slate-300 text-xs font-mono border-b border-slate-700">
-                                                                               <span>{match[1]}</span>
-                                                                               <button onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ""))} className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-white flex items-center gap-1"><Copy className="w-3 h-3"/> Copy</button>
+                                                                        <div className={`relative group my-4 rounded-xl overflow-hidden ${isDarkMode ? 'bg-[#1e1e1e]' : 'bg-[#f8f9fa]'}`}>
+                                                                           <div className="flex items-center justify-between px-4 py-2 text-xs font-mono">
+                                                                               <div className="flex items-center gap-2">
+                                                                                   <span className="font-bold text-slate-400">&lt; /&gt;</span>
+                                                                                   <span className={isDarkMode ? "text-slate-300" : "text-slate-700"}>{match[1].toUpperCase()}</span>
+                                                                               </div>
+                                                                               <button onClick={() => navigator.clipboard.writeText(String(children).replace(/\n$/, ""))} className={`opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}><Copy className="w-3.5 h-3.5"/></button>
                                                                            </div>
                                                                            <SyntaxHighlighter
                                                                                style={isDarkMode ? vscDarkPlus : coy}
                                                                                language={match[1]}
                                                                                PreTag="div"
-                                                                               customStyle={{ margin: 0, padding: '1rem', background: isDarkMode ? '#1e1e1e' : '#f8f9fa' }}
+                                                                               customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
                                                                                {...props}
                                                                            >
                                                                                {String(children).replace(/\n$/, "")}
@@ -178,10 +184,10 @@ const ChatInterface = ({
                                                 ) : (
                                                     <div className="whitespace-pre-wrap break-words">{msg.text}</div>
                                                 )}
-                                                <div className={`mt-2 text-xs opacity-70 ${msg.role === "user" ? "text-right text-purple-200" : isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                                                <div className={`mt-2 text-xs opacity-70 ${msg.role === "user" ? (isDarkMode ? "text-right text-slate-400" : "text-right text-slate-500") : isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
                                                     {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                 </div>
-                                                <div className={`mt-3 flex items-center gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                                                <div className={`mt-3 flex items-center gap-2 opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                                                     {editingMessageId === msg._id ? (
                                                         <>
                                                             <button
@@ -287,50 +293,90 @@ const ChatInterface = ({
                             </motion.div>
                         )}
 
-                        <div className={`flex items-end gap-2 rounded-[2rem] border p-2 pl-4 shadow-sm transition-all focus-within:ring-4 focus-within:ring-purple-500/30 focus-within:border-purple-500/50 sm:gap-3 ${isDarkMode ? "glass-panel-dark" : "glass-panel"}`}>
-                            <button
-                                type="button"
-                                className={`rounded-lg p-2.5 transition-colors ${isDarkMode ? "text-slate-400 hover:bg-slate-800 hover:text-purple-300" : "text-slate-500 hover:bg-white hover:text-purple-600"}`}
-                                title="Voice input"
-                            >
-                                <Mic className="h-5 w-5" />
-                            </button>
+                        <AnimatePresence>
+                            {input.trim().length > 0 && !input.startsWith("Act as a") && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="flex w-full overflow-x-auto scrollbar-none gap-2 mb-[-14px] pb-2 relative z-10 px-2"
+                                >
+                                    {expertPrompts.map((p, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => setInput(p.text + input.trim())}
+                                            className={`flex whitespace-nowrap shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${isDarkMode ? "bg-slate-800 text-purple-300 hover:bg-slate-700 border border-slate-700" : "bg-white text-purple-600 hover:bg-slate-50 border border-slate-200"}`}
+                                        >
+                                            <Sparkle className="h-3 w-3" />
+                                            {p.label}
+                                        </button>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
+                        <div className={`flex flex-col w-full rounded-[1.5rem] border p-3 shadow-sm transition-all focus-within:ring-4 focus-within:ring-purple-500/30 focus-within:border-purple-500/50 ${isDarkMode ? "glass-panel-dark relative z-20 bg-[#212121]/90" : "glass-panel relative z-20 bg-white/90"}`}>
                             <textarea
                                 value={input}
-                                onChange={(e) => setInput(e.target.value)}
+                                onChange={(e) => {
+                                    setInput(e.target.value);
+                                    e.target.style.height = 'auto';
+                                    e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !e.shiftKey) {
                                         e.preventDefault();
-                                        onSend();
+                                        if (input.trim() && !isLoading) {
+                                            onSend();
+                                            e.target.style.height = 'auto'; // Reset height after send
+                                        }
                                     }
                                 }}
                                 placeholder={`Ask ${MODES[activeMode].label}...`}
                                 rows={1}
-                                className={`max-h-32 min-h-11 flex-1 resize-none bg-transparent px-1 py-3 text-base outline-none placeholder:text-slate-400 ${isDarkMode ? "text-white" : "text-slate-800"}`}
+                                className={`w-full max-h-[200px] resize-none bg-transparent px-2 py-1 text-[15px] outline-none placeholder:text-slate-400 ${isDarkMode ? "text-white" : "text-slate-800"}`}
+                                style={{ minHeight: '44px' }}
                             />
 
-                            <button
-                                type="button"
-                                className={`hidden rounded-lg p-2.5 transition-colors sm:inline-flex ${isDarkMode ? "text-slate-400 hover:bg-slate-800 hover:text-blue-300" : "text-slate-500 hover:bg-white hover:text-blue-600"}`}
-                                title="Improve prompt"
-                            >
-                                <Sparkle className="h-5 w-5" />
-                            </button>
+                            <div className="flex justify-between items-center w-full mt-2">
+                                <div className="flex items-center">
+                                    <button
+                                        type="button"
+                                        className={`rounded-full p-2 transition-colors ${isDarkMode ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+                                        title="Add attachment"
+                                    >
+                                        <div className="h-5 w-5 flex items-center justify-center border-2 border-current rounded-full pb-0.5 text-lg font-medium">+</div>
+                                    </button>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        className={`rounded-full p-2 transition-colors ${isDarkMode ? "text-slate-400 hover:bg-slate-800 hover:text-white" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"}`}
+                                        title="Voice input"
+                                    >
+                                        <Mic className="h-5 w-5" />
+                                    </button>
 
-                                <motion.button
-                                type="button"
-                                whileTap={{ scale: 0.94 }}
-                                onClick={onSend}
-                                disabled={!input.trim() || isLoading}
-                                className={`rounded-full p-3.5 transition-all duration-300 ${input.trim() && !isLoading
-                                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]"
-                                    : isDarkMode ? "bg-slate-800 text-slate-600" : "bg-slate-200 text-slate-400"
-                                    }`}
-                                title="Send message"
-                            >
-                                <Send className="h-5 w-5" />
-                            </motion.button>
+                                    <motion.button
+                                        type="button"
+                                        whileTap={{ scale: 0.94 }}
+                                        onClick={() => {
+                                            onSend();
+                                            // The textarea height reset will rely on normal react render flow or needs a ref,
+                                            // but for now the user typing again will auto-reset it because it's controlled.
+                                        }}
+                                        disabled={!input.trim() || isLoading}
+                                        className={`flex h-9 w-9 items-center justify-center rounded-full transition-all duration-300 ${input.trim() && !isLoading
+                                            ? isDarkMode ? "bg-white text-black hover:bg-slate-200" : "bg-black text-white hover:bg-slate-800"
+                                            : isDarkMode ? "bg-slate-800 text-slate-600" : "bg-slate-200 text-slate-400"
+                                            }`}
+                                        title="Send message"
+                                    >
+                                        <Send className="h-4 w-4" />
+                                    </motion.button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -395,31 +441,34 @@ const ChatModePanel = ({ isDarkMode, settings }) => {
                             Refresh
                         </button>
 
-                        <select
-                            value={ollamaModel}
-                            onChange={(e) => setOllamaModel(e.target.value)}
-                            disabled={!ollamaModels.length || Boolean(customOllamaModel.trim())}
-                            className={`min-h-10 rounded-lg border px-3 text-sm outline-none disabled:opacity-50 ${isDarkMode ? "border-slate-800 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-800"}`}
-                        >
-                            <option value="">Select model</option>
-                            {ollamaModels.map((model) => (
-                                <option key={model.name} value={model.name}>{model.name}</option>
-                            ))}
-                        </select>
+                        <div className={`flex items-center overflow-hidden rounded-lg border focus-within:border-purple-500/50 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all ${isDarkMode ? "border-slate-800 bg-slate-900" : "border-slate-200 bg-white"}`}>
+                            <select
+                                value={ollamaModel}
+                                onChange={(e) => setOllamaModel(e.target.value)}
+                                disabled={!ollamaModels.length || Boolean(customOllamaModel.trim())}
+                                className={`h-10 border-r px-3 text-sm outline-none bg-transparent disabled:opacity-50 ${isDarkMode ? "border-slate-800 text-white" : "border-slate-200 text-slate-800"}`}
+                            >
+                                <option value="" className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>Select model</option>
+                                {ollamaModels.map((model) => (
+                                    <option key={model.name} value={model.name} className={isDarkMode ? "bg-slate-900 text-white" : "bg-white text-slate-900"}>{model.name}</option>
+                                ))}
+                            </select>
 
-                        <input
-                            value={customOllamaModel}
-                            onChange={(e) => setCustomOllamaModel(e.target.value)}
-                            placeholder="Custom model"
-                            className={`min-h-10 rounded-lg border px-3 text-sm outline-none ${isDarkMode ? "border-slate-800 bg-slate-900 text-white placeholder:text-slate-500" : "border-slate-200 bg-white text-slate-800 placeholder:text-slate-400"}`}
-                        />
+                            <input
+                                value={customOllamaModel}
+                                onChange={(e) => setCustomOllamaModel(e.target.value)}
+                                placeholder="Or enter custom tag..."
+                                className={`h-10 w-44 bg-transparent px-3 text-sm outline-none ${isDarkMode ? "text-white placeholder:text-slate-500" : "text-slate-800 placeholder:text-slate-400"}`}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
 
             {provider === "offline" && (ollamaError || !ollamaStatus.running || ollamaModels.length === 0) && (
-                <div className={`mt-3 rounded-lg border px-3 py-2 text-sm ${isDarkMode ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-red-200 bg-red-50 text-red-700"}`}>
-                    {ollamaError || "Please start Ollama locally to use offline mode."}
+                <div className={`mt-3 rounded-lg border px-3 py-2 text-sm flex items-center gap-2 ${isDarkMode ? "border-red-500/30 bg-red-500/10 text-red-200" : "border-red-200 bg-red-50 text-red-700"}`}>
+                    <X className="w-4 h-4 shrink-0" />
+                    {ollamaError || "Please start Ollama locally and pull a model to use offline mode."}
                 </div>
             )}
         </div>
@@ -427,27 +476,46 @@ const ChatModePanel = ({ isDarkMode, settings }) => {
 };
 
 const OfflineSetupGuide = ({ isDarkMode }) => {
-    const commands = [
-        "ollama serve",
-        "ollama pull llama3",
-        "ollama pull mistral",
-        "ollama list",
-    ];
-
     return (
-        <div className={`mt-6 w-full max-w-2xl rounded-xl border p-4 text-left ${isDarkMode ? "border-slate-800 bg-slate-950 text-slate-300" : "border-slate-200 bg-slate-50 text-slate-700"}`}>
-            <h3 className={`text-base font-semibold ${isDarkMode ? "text-white" : "text-slate-950"}`}>Run Offline Mode</h3>
-            <ol className="mt-3 space-y-3 text-sm">
-                <li>1. Install Ollama from <a className="text-purple-400 underline" href="https://ollama.com/download" target="_blank" rel="noreferrer">ollama.com/download</a>.</li>
-                <li>2. Start Ollama locally.</li>
-                <li>3. Pull at least one model.</li>
-                <li>4. Verify your local models.</li>
+        <div className={`mt-6 w-full max-w-2xl rounded-2xl border p-6 text-left ${isDarkMode ? "border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-slate-900/50 text-slate-300 shadow-[0_0_15px_rgba(168,85,247,0.05)]" : "border-purple-500/20 bg-purple-50 text-slate-700"}`}>
+            <h3 className={`text-lg font-bold flex items-center gap-2 ${isDarkMode ? "text-white" : "text-slate-950"}`}>
+                <HardDrive className="w-5 h-5 text-purple-400" />
+                Setting up Offline Mode
+            </h3>
+            <p className="mt-2 text-sm opacity-90 mb-4">
+                To run the AI completely offline on your own device without API keys, follow these steps:
+            </p>
+            <ol className="space-y-4 text-sm font-medium">
+                <li className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400">1</span>
+                        <span>Download and install Ollama from</span>
+                    </div>
+                    <a className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors ml-8 sm:ml-0" href="https://ollama.com/download" target="_blank" rel="noreferrer">ollama.com</a>
+                </li>
+                <li className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400">2</span>
+                        <span>Open your terminal and run the Ollama server:</span>
+                    </div>
+                    <div className="ml-8">
+                        <CopyableCommand command="ollama serve" isDarkMode={isDarkMode} />
+                    </div>
+                </li>
+                <li className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400">3</span>
+                        <span>Open a new terminal tab and pull your preferred model:</span>
+                    </div>
+                    <div className="ml-8">
+                        <CopyableCommand command="ollama pull llama3" isDarkMode={isDarkMode} />
+                    </div>
+                </li>
+                <li className="flex items-center gap-2 pt-2">
+                    <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-xs text-emerald-400"><Check className="w-3.5 h-3.5" /></span>
+                    <span className={isDarkMode ? "text-emerald-400" : "text-emerald-600"}>You're all set! Just click the "Refresh" button above and select your model.</span>
+                </li>
             </ol>
-            <div className="mt-4 space-y-2">
-                {commands.map((command) => (
-                    <CopyableCommand key={command} command={command} isDarkMode={isDarkMode} />
-                ))}
-            </div>
         </div>
     );
 };

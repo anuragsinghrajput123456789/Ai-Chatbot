@@ -7,10 +7,10 @@ import Footer from "./Footer";
 import KittyBot from "./KittyBot";
 import Navbar from "./Navbar";
 
-const LandingPage = ({ isDarkMode, toggleDarkMode }) => {
+const LandingPage = ({ isDarkMode, toggleDarkMode, user }) => {
     return (
         <div className={`flex min-h-screen w-full flex-col font-sans transition-colors duration-300 ${isDarkMode ? "bg-slate-950" : "bg-slate-50"}`}>
-            <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} />
 
             <main className="relative flex-1 overflow-x-hidden">
                 <section className="mx-auto grid w-full max-w-7xl items-center gap-8 px-4 py-8 sm:gap-10 sm:py-10 lg:min-h-[calc(100vh-9rem)] lg:grid-cols-[0.95fr_1.05fr] lg:py-14">
@@ -26,11 +26,15 @@ const LandingPage = ({ isDarkMode, toggleDarkMode }) => {
                         </div>
 
                         <h1 className={`max-w-3xl text-5xl font-black leading-tight tracking-tight sm:text-6xl lg:text-7xl ${isDarkMode ? "text-white" : "text-slate-950"}`}>
-                            <span className="text-gradient">Talk to an AI agent</span> that is ready to help.
+                            {user ? (
+                                <>Hi <span className="text-gradient">{user.username}</span>, let's chat.</>
+                            ) : (
+                                <><span className="text-gradient">Talk to an AI agent</span> that is ready to help.</>
+                            )}
                         </h1>
 
                         <p className={`mt-5 max-w-2xl text-base leading-7 sm:text-lg ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-                            Sign in, choose a mode, and start a real chat for coding help, study support, creative writing, or everyday questions.
+                            {user ? "Pick up where you left off, manage your chat history, and explore new modes." : "Sign in, choose a mode, and start a real chat for coding help, study support, creative writing, or everyday questions."}
                         </p>
 
                         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
@@ -38,15 +42,17 @@ const LandingPage = ({ isDarkMode, toggleDarkMode }) => {
                                 to="/chat"
                                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-9 py-4 text-lg font-bold text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]"
                             >
-                                Start chatting free
+                                {user ? "Go to Chat" : "Start chatting free"}
                                 <Send className="h-5 w-5" />
                             </Link>
-                            <Link
-                                to="/login"
-                                className={`inline-flex items-center justify-center rounded-full border px-9 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 ${isDarkMode ? "border-slate-700 bg-slate-800/50 text-slate-200 hover:bg-slate-700/80 shadow-lg" : "border-slate-200 bg-white/50 text-slate-700 hover:bg-slate-50 shadow-md"}`}
-                            >
-                                Login
-                            </Link>
+                            {!user && (
+                                <Link
+                                    to="/login"
+                                    className={`inline-flex items-center justify-center rounded-full border px-9 py-4 text-lg font-bold transition-all duration-300 hover:scale-105 ${isDarkMode ? "border-slate-700 bg-slate-800/50 text-slate-200 hover:bg-slate-700/80 shadow-lg" : "border-slate-200 bg-white/50 text-slate-700 hover:bg-slate-50 shadow-md"}`}
+                                >
+                                    Login
+                                </Link>
+                            )}
                         </div>
 
                         <div className="mt-7 flex flex-wrap justify-center gap-3 lg:justify-start">

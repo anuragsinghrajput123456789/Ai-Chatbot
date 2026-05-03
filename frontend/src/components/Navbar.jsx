@@ -1,8 +1,10 @@
-import React from "react";
-import { Bot, Sun, Moon, LogOut, Trash2, Cpu, Home, Info, Mail, HardDrive, Cloud } from "lucide-react";
+import React, { useState } from "react";
+import { Bot, Sun, Moon, LogOut, Trash2, Cpu, Home, Info, HardDrive, Cloud, User as UserIcon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { MODES } from "../constants";
 import { useChatSettings } from "../context/ChatSettingsContext";
+
+const AVATARS = ["Bot", "User", "🤖", "😎", "🐱", "🚀", "🧑‍💻", "🦄", "🐼"];
 
 const Navbar = ({
     user,
@@ -10,11 +12,13 @@ const Navbar = ({
     toggleDarkMode,
     activeMode,
     onLogout,
-    onClearChat
+    onClearChat,
+    onChangeAvatar
 }) => {
     const location = useLocation();
     const { provider, setProvider, ollamaStatus } = useChatSettings();
     const CurrentIcon = activeMode ? (MODES[activeMode]?.icon || Bot) : Bot;
+    const [showAvatarDropdown, setShowAvatarDropdown] = useState(false);
 
     const navLinkClass = (path) => {
         const active = location.pathname === path;
@@ -24,76 +28,113 @@ const Navbar = ({
             }`;
     };
 
+    const handleSelectAvatar = (a) => {
+        if (onChangeAvatar) onChangeAvatar(a);
+        setShowAvatarDropdown(false);
+    };
+
+    const renderUserAvatar = () => {
+        if (!user) return null;
+        const avatarStr = user.avatar || "User";
+        
+        return (
+            <div className="relative">
+                <button
+                    onClick={() => setShowAvatarDropdown(!showAvatarDropdown)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${isDarkMode ? "border-slate-700 bg-slate-800 hover:border-purple-500" : "border-slate-200 bg-slate-100 hover:border-purple-500"}`}
+                    title="Change Avatar"
+                >
+                    {avatarStr === "Bot" ? <Bot className="h-5 w-5 text-purple-500" /> : 
+                     avatarStr === "User" ? <UserIcon className="h-5 w-5 text-purple-500" /> :
+                     <span className="text-xl leading-none">{avatarStr}</span>}
+                </button>
+
+                {showAvatarDropdown && (
+                    <div className={`absolute right-0 top-12 z-50 w-48 rounded-2xl border p-3 shadow-xl ${isDarkMode ? "border-slate-700 bg-slate-800 text-slate-200" : "border-slate-200 bg-white text-slate-700"}`}>
+                        <div className="mb-2 px-2 text-xs font-semibold text-slate-400">Select Avatar</div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {AVATARS.map((a) => (
+                                <button
+                                    key={a}
+                                    onClick={() => handleSelectAvatar(a)}
+                                    className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${isDarkMode ? "hover:bg-slate-700" : "hover:bg-slate-100"} ${user.avatar === a ? (isDarkMode ? "bg-slate-700 ring-2 ring-purple-500" : "bg-slate-100 ring-2 ring-purple-500") : ""}`}
+                                >
+                                    {a === "Bot" ? <Bot className="h-5 w-5" /> : 
+                                     a === "User" ? <UserIcon className="h-5 w-5" /> :
+                                     <span className="text-lg leading-none">{a}</span>}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
-        <nav className={`relative z-30 transition-colors duration-300 ${isDarkMode ? "glass-navbar-dark" : "glass-navbar"}`}>
-            <div className="mx-auto flex min-h-20 w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4">
-                <Link to="/" className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${activeMode ? (MODES[activeMode]?.color || "from-purple-600 to-pink-600") : "from-slate-800 to-slate-600"} text-white shadow-lg`}>
+        <nav className={`relative z-30 transition-colors duration-300 border-b ${isDarkMode ? "glass-navbar-dark border-slate-800" : "glass-navbar border-slate-200"}`}>
+            <div className="mx-auto flex min-h-[5.5rem] w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+                <Link to="/" className="flex min-w-0 items-center gap-3 group">
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] bg-gradient-to-br ${activeMode ? (MODES[activeMode]?.color || "from-purple-600 to-pink-600") : "from-slate-800 to-slate-600"} text-white shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300`}>
                         <CurrentIcon className="h-6 w-6" />
                     </div>
                     <div className="min-w-0">
-                        <h1 className={`truncate text-xl font-extrabold tracking-tight ${isDarkMode ? "text-white" : "text-slate-950"} hover:text-gradient transition-all`}>
-                            Chatterchatbot
+                        <h1 className={`truncate text-2xl font-black tracking-tight ${isDarkMode ? "text-white" : "text-slate-950"} group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-500 group-hover:bg-clip-text group-hover:text-transparent transition-all`}>
+                            Chatterbot
                         </h1>
-                        {activeMode && (
-                            <p className={`truncate text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
-                                {MODES[activeMode]?.label || "Chat"}
-                            </p>
-                        )}
+                        <p className={`truncate text-[10px] tracking-widest uppercase font-bold ${isDarkMode ? "text-purple-400" : "text-purple-600"}`}>
+                            {activeMode ? MODES[activeMode]?.label : "AI Assistant"}
+                        </p>
                     </div>
                 </Link>
 
-                <div className="flex flex-1 items-center justify-end gap-2">
-                    {!user && (
-                        <div className="hidden items-center gap-1 sm:flex">
-                            <Link to="/" className={navLinkClass("/")}>
-                                <Home className="h-4 w-4" />
-                                Home
-                            </Link>
-                            <Link to="/about" className={navLinkClass("/about")}>
-                                <Info className="h-4 w-4" />
-                                About
-                            </Link>
-                            <Link to="/contact" className={navLinkClass("/contact")}>
-                                <Mail className="h-4 w-4" />
-                                Contact
-                            </Link>
-                            <Link to="/chat" className={navLinkClass("/chat")}>
-                                <Bot className="h-4 w-4" />
-                                Chat
-                            </Link>
-                        </div>
-                    )}
+                <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
+                    <div className={`hidden items-center gap-1 sm:flex mr-2 p-1 rounded-2xl border ${isDarkMode ? "bg-slate-800/50 border-slate-700/50" : "bg-slate-100 border-slate-200/50"}`}>
+                        <Link to="/" className={navLinkClass("/")}>
+                            <Home className="h-4 w-4" />
+                            Home
+                        </Link>
+                        <Link to="/about" className={navLinkClass("/about")}>
+                            <Info className="h-4 w-4" />
+                            About
+                        </Link>
+                        <Link to="/chat" className={navLinkClass("/chat")}>
+                            <Bot className="h-4 w-4" />
+                            Chat
+                        </Link>
+                    </div>
 
-                    <div className="hidden items-center gap-2 sm:flex">
+                    <div className="hidden items-center gap-3 sm:flex">
                         <button
                             type="button"
                             onClick={() => setProvider(provider === "offline" ? "online" : "offline")}
-                            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${provider === "offline"
-                                ? ollamaStatus.running ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-red-500/20 text-red-300 border border-red-500/30"
-                                : isDarkMode ? "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 shadow-sm"
+                            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:-translate-y-0.5 hover:shadow-md ${provider === "offline"
+                                ? ollamaStatus.running ? "bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-400" : "bg-red-500 text-white shadow-red-500/20 hover:bg-red-400"
+                                : "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/20 hover:shadow-purple-500/40"
                                 }`}
                             title="Switch Online Gemini / Offline Ollama"
                         >
                             {provider === "offline" ? <HardDrive className="h-4 w-4" /> : <Cloud className="h-4 w-4" />}
-                            {provider === "offline" ? "Offline Ollama" : "Online Gemini"}
+                            {provider === "offline" ? "Local AI" : "Cloud AI"}
                         </button>
 
                         {user && (
-                            <>
-                                <div className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${isDarkMode ? "bg-slate-900 text-slate-300" : "bg-slate-100 text-slate-600"}`}>
-                                    <Cpu className="h-3.5 w-3.5 text-emerald-500" />
-                                    AI Online
-                                </div>
-                            </>
+                            <div className={`hidden md:inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? "bg-slate-900 text-slate-300 border border-slate-800" : "bg-slate-100 text-slate-600 border border-slate-200"}`}>
+                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                AI Online
+                            </div>
                         )}
 
-                        {(user || location.pathname === "/chat") && (
+                        <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+                        {renderUserAvatar()}
+                        
+                        {(user || location.pathname === "/chat") && onClearChat && (
                             <button
                                 type="button"
                                 onClick={onClearChat}
-                                className={`rounded-lg p-2.5 transition-colors ${isDarkMode ? "text-red-300 hover:bg-red-500/10" : "text-red-600 hover:bg-red-50"}`}
-                                title="Clear chat"
+                                className={`rounded-xl p-2.5 transition-colors ${isDarkMode ? "text-red-400 hover:bg-red-500/10" : "text-red-500 hover:bg-red-50"}`}
+                                title="Clear chat messages"
                             >
                                 <Trash2 className="h-5 w-5" />
                             </button>

@@ -6,15 +6,20 @@ import { MODES } from "./constants";
 import LandingPage from "./components/LandingPage";
 import About from "./pages/About";
 import AuthPage from "./pages/AuthPage";
-import Contact from "./pages/Contact";
-import { deleteSavedChatMessage, fetchChatHistory, deleteChatHistory, sendMessageToBackend, updateSavedChatMessage } from "./api";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { 
+  deleteSavedChatMessage, fetchChatList, fetchChatSession, deleteChatHistory, 
+  sendMessageToBackend, updateSavedChatMessage, deleteChatSession, renameChatSession, updateUserAvatar 
+} from "./api";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 export default function App() {
   return (
-    <ChatSettingsProvider>
-      <AppRoutes />
-    </ChatSettingsProvider>
+    <ErrorBoundary>
+      <ChatSettingsProvider>
+        <AppRoutes />
+      </ChatSettingsProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -24,6 +29,8 @@ function AppRoutes() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [chatList, setChatList] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -50,21 +57,40 @@ function AppRoutes() {
     timestamp: new Date().toISOString(),
   });
 
-  const loadHistory = async () => {
+  const loadChatList = async () => {
     try {
-      const history = await fetchChatHistory();
-      setMessages(history);
+      const history = await fetchChatList();
+      setChatList(history);
+      if (history.length > 0 && !currentChatId) {
+        handleSelectChat(history[0]._id);
+      }
     } catch (err) {
-      console.error("Failed to load history", err);
+      console.error("Failed to load chat list", err);
     }
+  };
+
+  const handleSelectChat = async (chatId) => {
+    setCurrentChatId(chatId);
+    try {
+      const sessionMessages = await fetchChatSession(chatId);
+      setMessages(sessionMessages);
+    } catch (err) {
+      console.error("Failed to load chat session", err);
+    }
+  };
+
+  const handleNewChat = () => {
+    setCurrentChatId(null);
+    setMessages([]);
   };
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedName = localStorage.getItem("username");
+    const savedAvatar = localStorage.getItem("avatar");
     if (savedToken && savedName) {
-      setUser({ token: savedToken, username: savedName });
-      loadHistory();
+      setUser({ token: savedToken, username: savedName, avatar: savedAvatar || 'Bot' });
+      loadChatList();
     } else {
       setMessages(readGuestMessages());
     }
@@ -73,10 +99,10 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
-    if (isAuthReady && !user) {
+    if (isAuthReady && !user && !currentChatId) {
       localStorage.setItem(GUEST_CHAT_KEY, JSON.stringify(messages));
     }
-  }, [messages, user, isAuthReady]);
+  }, [messages, user, isAuthReady, currentChatId]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -86,15 +112,30 @@ function AppRoutes() {
   const handleLogin = (userData) => {
     localStorage.setItem("token", userData.token);
     localStorage.setItem("username", userData.username);
+    localStorage.setItem("avatar", userData.avatar || 'Bot');
     setUser(userData);
-    loadHistory();
+    loadChatList();
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem("avatar");
     setUser(null);
+    setChatList([]);
+    setCurrentChatId(null);
     setMessages(readGuestMessages());
+  };
+
+  const handleChangeAvatar = async (newAvatar) => {
+    try {
+      const data = await updateUserAvatar(newAvatar);
+      const updatedUser = { ...user, avatar: data.avatar };
+      setUser(updatedUser);
+      localStorage.setItem("avatar", data.avatar);
+    } catch (err) {
+      alert("Failed to update avatar");
+    }
   };
 
   const handleClearChat = async () => {
@@ -102,6 +143,8 @@ function AppRoutes() {
     try {
       if (user) {
         await deleteChatHistory();
+        setChatList([]);
+        setCurrentChatId(null);
       }
       setMessages([]);
       if (!user) {
@@ -110,6 +153,30 @@ function AppRoutes() {
     } catch (err) {
       console.error(err);
       alert("Could not delete chat history");
+    }
+  };
+
+  const handleDeleteChatSession = async (chatId) => {
+    if (!window.confirm("Are you sure you want to delete this chat session?")) return;
+    try {
+      await deleteChatSession(chatId);
+      setChatList(prev => prev.filter(c => c._id !== chatId));
+      if (currentChatId === chatId) {
+        handleNewChat();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Could not delete chat session");
+    }
+  };
+
+  const handleRenameChatSession = async (chatId, newTitle) => {
+    try {
+      const data = await renameChatSession(chatId, newTitle);
+      setChatList(prev => prev.map(c => c._id === chatId ? { ...c, title: data.chat.title } : c));
+    } catch (err) {
+      console.error(err);
+      alert("Could not rename chat session");
     }
   };
 
@@ -126,30 +193,37 @@ function AppRoutes() {
       let reply;
 
       if (provider === "offline") {
-        if (!ollamaStatus.running) {
-          throw new Error("Please start Ollama locally to use offline mode.");
-        }
-
-        if (!selectedOllamaModel) {
-          throw new Error("Choose or enter an Ollama model before sending.");
-        }
-
-        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'offline', selectedOllamaModel);
+        if (!ollamaStatus.running) throw new Error("Please start Ollama locally to use offline mode.");
+        if (!selectedOllamaModel) throw new Error("Choose or enter an Ollama model before sending.");
+        
+        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'offline', selectedOllamaModel, currentChatId);
         reply = data.reply;
 
-        if (user && data.messages) {
-          setIsTyping(false);
-          setMessages(data.messages);
-          return;
+        if (user) {
+          if (!currentChatId && data.chatId) {
+            setCurrentChatId(data.chatId);
+            loadChatList(); // Refresh list to get new title
+          }
+          if (data.messages) {
+            setIsTyping(false);
+            setMessages(data.messages);
+            return;
+          }
         }
       } else {
-        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt);
+        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'online', null, currentChatId);
         reply = data.reply;
 
-        if (user && data.messages) {
-          setIsTyping(false);
-          setMessages(data.messages);
-          return;
+        if (user) {
+          if (!currentChatId && data.chatId) {
+            setCurrentChatId(data.chatId);
+            loadChatList(); // Refresh list to get new title
+          }
+          if (data.messages) {
+            setIsTyping(false);
+            setMessages(data.messages);
+            return;
+          }
         }
       }
 
@@ -198,48 +272,10 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/"
-          element={
-            <LandingPage
-              isDarkMode={isDarkMode}
-              toggleDarkMode={toggleDarkMode}
-            />
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            user ? (
-              <Navigate to="/chat" replace />
-            ) : (
-              <AuthPage
-                mode="login"
-                onLogin={handleLogin}
-                isDarkMode={isDarkMode}
-                toggleDarkMode={toggleDarkMode}
-              />
-            )
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            user ? (
-              <Navigate to="/chat" replace />
-            ) : (
-              <AuthPage
-                mode="signup"
-                onLogin={handleLogin}
-                isDarkMode={isDarkMode}
-                toggleDarkMode={toggleDarkMode}
-              />
-            )
-          }
-        />
+        <Route path="/" element={<LandingPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} />} />
+        <Route path="/login" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="login" onLogin={handleLogin} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
+        <Route path="/signup" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="signup" onLogin={handleLogin} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
         <Route path="/about" element={<About isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} onLogout={handleLogout} />} />
-        <Route path="/contact" element={<Contact isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} onLogout={handleLogout} />} />
 
         <Route
           path="/chat"
@@ -251,6 +287,13 @@ function AppRoutes() {
               user={user}
               onLogout={handleLogout}
               onClearChat={handleClearChat}
+              onChangeAvatar={handleChangeAvatar}
+              chatList={chatList}
+              currentChatId={currentChatId}
+              onSelectChat={handleSelectChat}
+              onNewChat={handleNewChat}
+              onDeleteChatSession={handleDeleteChatSession}
+              onRenameChatSession={handleRenameChatSession}
             >
               <ChatInterface
                 messages={messages}

@@ -1,40 +1,41 @@
-import { GoogleGenAI } from '@google/genai';
+import { OpenRouter } from "@openrouter/sdk";
 
-const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-
-const getGeminiClient = () => {
-    if (!process.env.GEMINI_API_KEY) {
-        const err = new Error('GEMINI_API_KEY is required');
+const getOpenRouterClient = () => {
+    if (!process.env.OPENROUTER_API_KEY) {
+        const err = new Error('OPENROUTER_API_KEY is required');
         err.statusCode = 500;
         throw err;
     }
 
-    return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    return new OpenRouter({
+        apiKey: process.env.OPENROUTER_API_KEY
+    });
 };
 
 export const generateGeminiReply = async ({ messages, message, systemPrompt }) => {
     const recentMessages = messages.slice(-12).map((msg) => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }],
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.text,
     }));
 
-    const promptText = systemPrompt?.trim()
-        ? `${systemPrompt.trim()}\n\nUser message: ${message}`
-        : message;
+    if (systemPrompt?.trim()) {
+        recentMessages.unshift({ role: 'system', content: systemPrompt.trim() });
+    }
 
-    const ai = getGeminiClient();
-    const response = await ai.models.generateContent({
-        model: MODEL_NAME,
-        contents: [
-            ...recentMessages,
-            { role: 'user', parts: [{ text: promptText }] },
-        ],
-        config: {
-            maxOutputTokens: 4096,
-        },
+    recentMessages.push({ role: 'user', content: message });
+
+    const ai = getOpenRouterClient();
+    
+    const stream = await ai.chat.send({
+        chatRequest: {
+            model: "openrouter/owl-alpha",
+            messages: recentMessages,
+            stream: false // Using non-streaming for current chatController logic
+        }
     });
 
-    const reply = response.text?.trim();
+    const reply = stream?.choices?.[0]?.message?.content?.trim();
+    
     if (!reply) {
         const err = new Error('AI response was empty');
         err.statusCode = 500;
