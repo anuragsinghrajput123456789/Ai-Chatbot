@@ -45,7 +45,7 @@
   </tr>
   <tr>
     <td align="center" colspan="1">
-      <img src="./screenshots/online.png" alt="Online Mode - Gemini AI" width="100%"/>
+      <img src="./screenshots/chat.png" alt="Online Mode - Gemini AI" width="100%"/>
       <br/><br/>
       <strong>🌐 Online Mode — Gemini AI</strong><br/>
       <em>Cloud-powered responses with persistent chat history</em>
