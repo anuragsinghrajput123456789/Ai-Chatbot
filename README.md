@@ -25,16 +25,42 @@
 <table>
   <tr>
     <td align="center" width="33%">
-      <strong>🏠 Home — Hero Section</strong><br/><br/>
+      <img src="./screenshots/home.png" alt="Home Page - Hero Section" width="100%"/>
+      <br/><br/>
+      <strong>🏠 Home — Hero Section</strong><br/>
       <em>Modern landing with animated AI robot, mode switcher, and prompt preview</em>
     </td>
     <td align="center" width="33%">
-      <strong>ℹ️ About — Mission Page</strong><br/><br/>
+      <img src="./screenshots/about.png" alt="About Page - Mission" width="100%"/>
+      <br/><br/>
+      <strong>ℹ️ About — Mission Page</strong><br/>
       <em>Mission statement, live stats (Gemini 1.5, 10k+ Users, 24/7, 100% Privacy)</em>
     </td>
     <td align="center" width="33%">
-      <strong>💬 Chat — Interface</strong><br/><br/>
+      <img src="./screenshots/chat.png" alt="Chat Interface - Online Mode" width="100%"/>
+      <br/><br/>
+      <strong>💬 Chat — Interface</strong><br/>
       <em>4 specialized AI modes: Friendly Chat, Code Expert, Study Buddy, Creative Muse</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="1">
+      <img src="./screenshots/online.png" alt="Online Mode - Gemini AI" width="100%"/>
+      <br/><br/>
+      <strong>🌐 Online Mode — Gemini AI</strong><br/>
+      <em>Cloud-powered responses with persistent chat history</em>
+    </td>
+    <td align="center" colspan="1">
+      <img src="./screenshots/offline.png" alt="Offline Mode - Ollama" width="100%"/>
+      <br/><br/>
+      <strong>🔌 Offline Mode — Ollama</strong><br/>
+      <em>100% local AI — no internet, no data shared</em>
+    </td>
+    <td align="center" colspan="1">
+      <img src="./screenshots/modes.png" alt="Chat Mode Selection" width="100%"/>
+      <br/><br/>
+      <strong>🤖 Chat Mode Selection</strong><br/>
+      <em>Pick from Friendly Chat, Code Expert, Study Buddy, or Creative Muse</em>
     </td>
   </tr>
 </table>
