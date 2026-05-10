@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "./Navbar";
-import { MessageSquarePlus, MessageSquare, Trash2, Edit2, Menu, X, Check, XCircle } from "lucide-react";
+import { MessageSquarePlus, MessageSquare, Trash2, Edit2, Menu, X, Check, XCircle, Search } from "lucide-react";
 
 const Layout = ({ 
     children, 
@@ -18,9 +18,14 @@ const Layout = ({
     onDeleteChatSession,
     onRenameChatSession 
 }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [editingChatId, setEditingChatId] = useState(null);
     const [editTitle, setEditTitle] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredChatList = chatList?.filter(chat => 
+        chat.title?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -57,23 +62,45 @@ const Layout = ({
                 {/* Sidebar */}
                 {user && (
                     <div className={`${isSidebarOpen ? "w-72 border-r" : "w-0 border-0"} flex flex-col transition-all duration-300 overflow-hidden ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
-                        <div className="p-4 flex items-center gap-2">
-                            <button
-                                onClick={onNewChat}
-                                className={`flex flex-1 items-center justify-center gap-2 rounded-xl border p-3 text-sm font-semibold transition-all ${isDarkMode ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
-                            >
-                                <MessageSquarePlus className="h-5 w-5" />
-                                New Chat
-                            </button>
-                            <button 
-                                onClick={toggleSidebar}
-                                className={`hidden lg:flex p-3 items-center justify-center rounded-xl border transition-all ${isDarkMode ? "border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700" : "border-slate-300 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-100"}`}
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
+                        <div className="p-4 flex flex-col gap-4">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={onNewChat}
+                                    className={`flex flex-1 items-center justify-center gap-2 rounded-xl border p-3 text-sm font-semibold transition-all ${isDarkMode ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
+                                >
+                                    <MessageSquarePlus className="h-5 w-5" />
+                                    New Chat
+                                </button>
+                                <button 
+                                    onClick={toggleSidebar}
+                                    className={`hidden lg:flex p-3 items-center justify-center rounded-xl border transition-all ${isDarkMode ? "border-slate-700 bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700" : "border-slate-300 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-100"}`}
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className={`relative flex items-center rounded-xl border transition-all ${isDarkMode ? "border-slate-700 bg-slate-800/50" : "border-slate-200 bg-white"}`}>
+                                <Search className={`ml-3 h-4 w-4 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`} />
+                                <input
+                                    type="text"
+                                    placeholder="Search chats..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className={`w-full bg-transparent p-2.5 text-sm outline-none transition-all ${isDarkMode ? "text-slate-200 placeholder:text-slate-600" : "text-slate-800 placeholder:text-slate-400"}`}
+                                />
+                                {searchQuery && (
+                                    <button 
+                                        onClick={() => setSearchQuery("")}
+                                        className={`mr-2 p-1 rounded-full transition-colors ${isDarkMode ? "text-slate-500 hover:text-slate-300 hover:bg-slate-700" : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"}`}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
-                            {chatList?.map(chat => (
+                        <div className="flex-1 overflow-y-auto p-3 pt-0 space-y-1 scrollbar-thin">
+                            {filteredChatList?.map(chat => (
                                 <div
                                     key={chat._id}
                                     className={`group relative flex items-center justify-between rounded-lg p-2.5 text-sm transition-all ${currentChatId === chat._id ? (isDarkMode ? "bg-slate-800 text-white" : "bg-slate-200 text-slate-900") : (isDarkMode ? "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200" : "text-slate-600 hover:bg-slate-100 hover:text-slate-800")}`}

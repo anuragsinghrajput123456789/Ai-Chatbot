@@ -41,7 +41,7 @@ const parseJsonResponse = async (response) => {
 };
 
 export const getOllamaStatus = async () => {
-    const response = await withTimeout(`${OLLAMA_BASE_URL}/api/tags`, {}, 3000);
+    const response = await withTimeout(`${OLLAMA_BASE_URL}/api/tags`, {}, 10000);
     if (!response.ok) {
         const err = new Error('Ollama is not responding correctly');
         err.statusCode = 503;

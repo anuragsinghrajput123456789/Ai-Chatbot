@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
+import { mongoSanitize } from './middlewares/sanitizeMiddleware.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,7 +19,7 @@ const app = express();
 
 // Security Middlewares
 app.use(helmet({ contentSecurityPolicy: false })); // Disable CSP to avoid blocking frontend assets/APIs
-app.use(mongoSanitize());
+app.use(mongoSanitize);
 
 const allowedOrigins = [
     process.env.FRONTEND_URL,

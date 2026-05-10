@@ -80,7 +80,11 @@ const About = ({ isDarkMode, toggleDarkMode, user, onLogout }) => {
 
 const StatsCard = ({ icon: Icon, label, value, isDarkMode }) => (
     <div className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 text-center ${isDarkMode ? "bg-slate-800/50" : "bg-white/50"}`}>
-        <Icon className="w-6 h-6 text-purple-400" />
+        {Icon === Bot ? (
+            <img src="/bot-logo.png" alt="Bot" className="w-6 h-6 object-contain" />
+        ) : (
+            <Icon className="w-6 h-6 text-purple-400" />
+        )}
         <div className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-gray-900"}`}>{value}</div>
         <div className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>{label}</div>
     </div>

@@ -75,8 +75,8 @@ const Navbar = ({
         <nav className={`relative z-30 transition-colors duration-300 border-b ${isDarkMode ? "glass-navbar-dark border-slate-800" : "glass-navbar border-slate-200"}`}>
             <div className="mx-auto flex min-h-[5.5rem] w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4">
                 <Link to="/" className="flex min-w-0 items-center gap-3 group">
-                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] bg-gradient-to-br ${activeMode ? (MODES[activeMode]?.color || "from-purple-600 to-pink-600") : "from-slate-800 to-slate-600"} text-white shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300`}>
-                        <CurrentIcon className="h-6 w-6" />
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] bg-gradient-to-br ${activeMode ? (MODES[activeMode]?.color || "from-purple-600 to-pink-600") : "from-slate-800 to-slate-600"} text-white shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden p-1`}>
+                        <img src="/bot-logo.png" alt="Bot Logo" className="h-full w-full object-contain" />
                     </div>
                     <div className="min-w-0">
                         <h1 className={`truncate text-2xl font-black tracking-tight ${isDarkMode ? "text-white" : "text-slate-950"} group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-500 group-hover:bg-clip-text group-hover:text-transparent transition-all`}>
@@ -104,24 +104,36 @@ const Navbar = ({
                         </Link>
                     </div>
 
-                    <div className="hidden items-center gap-3 sm:flex">
-                        <button
-                            type="button"
-                            onClick={() => setProvider(provider === "offline" ? "online" : "offline")}
-                            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all shadow-sm hover:-translate-y-0.5 hover:shadow-md ${provider === "offline"
-                                ? ollamaStatus.running ? "bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-400" : "bg-red-500 text-white shadow-red-500/20 hover:bg-red-400"
-                                : "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/20 hover:shadow-purple-500/40"
-                                }`}
-                            title="Switch Online Gemini / Offline Ollama"
-                        >
-                            {provider === "offline" ? <HardDrive className="h-4 w-4" /> : <Cloud className="h-4 w-4" />}
-                            {provider === "offline" ? "Local AI" : "Cloud AI"}
-                        </button>
+                    <div className="hidden items-center gap-2 sm:flex">
+                        <div className={`flex items-center gap-1 p-1 rounded-full border ${isDarkMode ? "bg-slate-900/50 border-slate-800" : "bg-slate-100 border-slate-200"}`}>
+                            <button
+                                type="button"
+                                onClick={() => setProvider("online")}
+                                className={`flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${provider === "online"
+                                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+                                    : isDarkMode ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"
+                                    }`}
+                            >
+                                <Cloud className="h-3.5 w-3.5" />
+                                Online Mode
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setProvider("offline")}
+                                className={`flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${provider === "offline"
+                                    ? ollamaStatus.running ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-red-500 text-white shadow-lg shadow-red-500/20"
+                                    : isDarkMode ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"
+                                    }`}
+                            >
+                                <HardDrive className="h-3.5 w-3.5" />
+                                Offline Mode
+                            </button>
+                        </div>
 
                         {user && (
-                            <div className={`hidden md:inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? "bg-slate-900 text-slate-300 border border-slate-800" : "bg-slate-100 text-slate-600 border border-slate-200"}`}>
-                                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                AI Online
+                            <div className={`hidden md:inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest ${isDarkMode ? "bg-slate-900 text-slate-300 border border-slate-800" : "bg-slate-100 text-slate-600 border border-slate-200"}`}>
+                                <div className={`h-2 w-2 rounded-full animate-pulse ${provider === "offline" ? "bg-amber-500" : "bg-emerald-500"}`}></div>
+                                {provider === "offline" ? "AI Offline" : "AI Online"}
                             </div>
                         )}
 
