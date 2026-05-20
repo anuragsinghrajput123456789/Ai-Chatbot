@@ -4,9 +4,9 @@ import Layout from "./components/Layout";
 import { ChatSettingsProvider, useChatSettings } from "./context/ChatSettingsContext";
 import { MODES } from "./constants";
 import LandingPage from "./components/LandingPage";
-import About from "./pages/About";
 import AuthPage from "./pages/AuthPage";
 import ErrorBoundary from "./components/ErrorBoundary";
+import SmoothScroll from "./components/SmoothScroll";
 import { 
   deleteSavedChatMessage, fetchChatList, fetchChatSession, deleteChatHistory, 
   sendMessageToBackend, updateSavedChatMessage, deleteChatSession, renameChatSession, updateUserAvatar 
@@ -61,9 +61,6 @@ function AppRoutes() {
     try {
       const history = await fetchChatList();
       setChatList(history);
-      if (history.length > 0 && !currentChatId) {
-        handleSelectChat(history[0]._id);
-      }
     } catch (err) {
       console.error("Failed to load chat list", err);
     }
@@ -88,9 +85,30 @@ function AppRoutes() {
     const savedToken = localStorage.getItem("token");
     const savedName = localStorage.getItem("username");
     const savedAvatar = localStorage.getItem("avatar");
+    const savedEmail = localStorage.getItem("email");
+    const savedOnlineUseCount = parseInt(localStorage.getItem("onlineUseCount") || "0", 10);
+    
     if (savedToken && savedName) {
-      setUser({ token: savedToken, username: savedName, avatar: savedAvatar || 'Bot' });
-      loadChatList();
+      setUser({ 
+        token: savedToken, 
+        username: savedName, 
+        avatar: savedAvatar || 'Bot',
+        email: savedEmail || "",
+        onlineUseCount: savedOnlineUseCount || 0
+      });
+      
+      const initChats = async () => {
+        try {
+          const history = await fetchChatList();
+          setChatList(history);
+          if (history.length > 0) {
+            handleSelectChat(history[0]._id);
+          }
+        } catch (err) {
+          console.error("Failed to initialize chat list", err);
+        }
+      };
+      initChats();
     } else {
       setMessages(readGuestMessages());
     }
@@ -105,14 +123,15 @@ function AppRoutes() {
   }, [messages, user, isAuthReady, currentChatId]);
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
+    // Force permanent dark mode - no-op
   };
 
   const handleLogin = (userData) => {
     localStorage.setItem("token", userData.token);
     localStorage.setItem("username", userData.username);
     localStorage.setItem("avatar", userData.avatar || 'Bot');
+    localStorage.setItem("email", userData.email || "");
+    localStorage.setItem("onlineUseCount", (userData.onlineUseCount || 0).toString());
     setUser(userData);
     loadChatList();
   };
@@ -121,6 +140,8 @@ function AppRoutes() {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("avatar");
+    localStorage.removeItem("email");
+    localStorage.removeItem("onlineUseCount");
     setUser(null);
     setChatList([]);
     setCurrentChatId(null);
@@ -215,6 +236,14 @@ function AppRoutes() {
         reply = data.reply;
 
         if (user) {
+          if (data.onlineUseCount !== undefined) {
+            setUser(prev => {
+              if (!prev) return prev;
+              const nextUser = { ...prev, onlineUseCount: data.onlineUseCount };
+              localStorage.setItem("onlineUseCount", data.onlineUseCount.toString());
+              return nextUser;
+            });
+          }
           if (!currentChatId && data.chatId) {
             setCurrentChatId(data.chatId);
             loadChatList(); // Refresh list to get new title
@@ -271,11 +300,11 @@ function AppRoutes() {
 
   return (
     <BrowserRouter>
+      <SmoothScroll />
       <Routes>
         <Route path="/" element={<LandingPage isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} />} />
         <Route path="/login" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="login" onLogin={handleLogin} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
         <Route path="/signup" element={user ? <Navigate to="/chat" replace /> : <AuthPage mode="signup" onLogin={handleLogin} isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />} />
-        <Route path="/about" element={<About isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} onLogout={handleLogout} />} />
 
         <Route
           path="/chat"

@@ -27,6 +27,9 @@ export const ChatSettingsProvider = ({ children }) => {
     localStorage.setItem(MODEL_STORAGE_KEY, model);
   }, []);
 
+  const selectedOllamaModelRef = React.useRef(selectedOllamaModel);
+  selectedOllamaModelRef.current = selectedOllamaModel;
+
   const refreshOllama = useCallback(async () => {
     setIsOllamaLoading(true);
     setOllamaError("");
@@ -44,8 +47,9 @@ export const ChatSettingsProvider = ({ children }) => {
       const models = await fetchOllamaModels();
       setOllamaModels(models);
 
-      if (models.length > 0 && !selectedOllamaModel) {
-        setOllamaModel(models[0].name);
+      if (models.length > 0 && !selectedOllamaModelRef.current) {
+        setOllamaModelState(models[0].name);
+        localStorage.setItem(MODEL_STORAGE_KEY, models[0].name);
       }
 
       if (models.length === 0) {
@@ -54,11 +58,12 @@ export const ChatSettingsProvider = ({ children }) => {
     } catch (err) {
       setOllamaStatus({ running: false, error: err.message });
       setOllamaModels([]);
-      setOllamaError(err.message);
+      setOllamaError(err.message || "Failed to connect to Ollama");
     } finally {
       setIsOllamaLoading(false);
     }
-  }, [selectedOllamaModel, setOllamaModel]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (provider === "offline") {

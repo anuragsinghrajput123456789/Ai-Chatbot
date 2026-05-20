@@ -8,7 +8,7 @@ const createToken = (userId) => {
         throw new Error('JWT_SECRET is required');
     }
 
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 export const register = async (req, res, next) => {
@@ -68,7 +68,9 @@ export const login = async (req, res, next) => {
         return res.json({
             token: createToken(user._id),
             username: user.username,
-            avatar: user.avatar || 'Bot'
+            avatar: user.avatar || 'Bot',
+            email: user.email,
+            onlineUseCount: user.onlineUseCount || 0
         });
     } catch (err) {
         return next(err);

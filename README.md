@@ -88,64 +88,54 @@
 
 <table>
   <tr>
+    <td>🚀</td>
+    <td><strong>GPU Scroll Acceleration</strong></td>
+    <td>Native browser smooth-scrolling backed by hardware-accelerated compositor layers (`will-change: transform`), guaranteeing 60fps jitter-free layout pans.</td>
+  </tr>
+  <tr>
+    <td>💬</td>
+    <td><strong>Symmetric Conversational UI</strong></td>
+    <td>Redesigned dialogue alignment (User responses right-symmetrical, Bot messages left-aligned inside elegant glassmorphic cards) complete with glowing visual avatars.</td>
+  </tr>
+  <tr>
     <td>🌐</td>
-    <td><strong>Online Mode (Gemini 1.5)</strong></td>
-    <td>Connect to Google's Gemini API for blazing-fast, cloud-powered AI responses</td>
+    <td><strong>Online Mode (Gemini 2.5/1.5)</strong></td>
+    <td>Blazing-fast cloud-powered intelligence via Google Gemini direct endpoints with OpenRouter API automatic fallbacks.</td>
   </tr>
   <tr>
     <td>🔌</td>
     <td><strong>Offline Mode (Ollama)</strong></td>
-    <td>Run completely locally using Ollama — zero internet, zero data sharing</td>
+    <td>100% on-device AI routing to local parameters (Llama3, Gemma) via a responsive collapsible sub-header setup panel (`ChatModePanel`).</td>
   </tr>
   <tr>
     <td>🤖</td>
     <td><strong>4 Specialized AI Modes</strong></td>
-    <td>Friendly Chat, Code Expert, Study Buddy, Creative Muse — each with tuned prompts</td>
+    <td>Friendly Chat, Code Expert, Study Buddy, Creative Muse — each automatically injecting system-level behavioral constraints.</td>
   </tr>
   <tr>
     <td>🔐</td>
     <td><strong>JWT Auth System</strong></td>
-    <td>Secure login & signup with bcrypt password hashing and JWT token sessions</td>
+    <td>Stateless secure login & signup with bcrypt password hashing and real-time expiration checks.</td>
   </tr>
   <tr>
     <td>💾</td>
     <td><strong>Persistent Chat History</strong></td>
-    <td>All signed-in conversations saved to MongoDB Atlas per user</td>
+    <td>All user conversational states, titles, and message logs saved securely to Mongoose Atlas collections.</td>
   </tr>
   <tr>
     <td>✍️</td>
     <td><strong>Markdown Rendering</strong></td>
-    <td>AI responses render with full Markdown + syntax-highlighted code blocks</td>
-  </tr>
-  <tr>
-    <td>⚡</td>
-    <td><strong>Professional Prompt Examples</strong></td>
-    <td>Pre-filled prompt suggestions per mode to onboard users instantly</td>
+    <td>High-fidelity React Markdown + syntax-highlighted code block interpreters with instant copy-to-clipboard microactions.</td>
   </tr>
   <tr>
     <td>🌗</td>
     <td><strong>Light / Dark Theme</strong></td>
-    <td>Toggle between dark glassmorphic and light modes seamlessly</td>
+    <td>Toggle between cinematic dark glassmorphism and crisp light modes seamlessly.</td>
   </tr>
   <tr>
     <td>🛡️</td>
-    <td><strong>Production Security</strong></td>
-    <td>Helmet headers, rate limiting, MongoDB sanitization, CORS policies</td>
-  </tr>
-  <tr>
-    <td>📱</td>
-    <td><strong>Fully Responsive</strong></td>
-    <td>Works flawlessly across mobile, tablet, and desktop</td>
-  </tr>
-  <tr>
-    <td>🔑</td>
-    <td><strong>Private API Keys</strong></td>
-    <td>Users can optionally bring their own Gemini API key for personal use</td>
-  </tr>
-  <tr>
-    <td>🎨</td>
-    <td><strong>Premium UI / Glassmorphism</strong></td>
-    <td>Framer Motion animations, Tailwind CSS, vibrant purple-pink gradients</td>
+    <td><strong>Exception Safety & Security</strong></td>
+    <td>Explicit Mongoose CastError catching, JWT token expire guards, mongo-sanitized request vectors, and global error boundaries.</td>
   </tr>
 </table>
 
@@ -408,19 +398,21 @@ Chatterbot offers **4 specialized AI personas**, each with custom system prompts
 
 ---
 
-## 🛡️ Security Features
+## 🛡️ Security Features & Exception Safety
 
-Chatterbot is built with **production-grade security** from the ground up:
+Chatterbot is built with **production-grade security** and exceptional resilience:
 
 ```
 ✅ Helmet.js           — Secure HTTP headers (XSS, clickjacking protection)
-✅ Rate Limiting       — Max 100 requests per 15 min per IP (express-rate-limit)
-✅ Mongo Sanitization  — Prevents NoSQL injection attacks
-✅ Input Sanitization  — Custom middleware strips dangerous input
-✅ JWT Auth            — Stateless, expiring token-based sessions
-✅ Bcrypt Hashing      — Passwords hashed with salt rounds
-✅ CORS Policy         — Strict origin allowlist for cross-origin requests
-✅ Error Handling      — Global error handler, no sensitive stack traces in prod
+✅ Rate Limiting       — Max 500 requests per 15 min per IP (express-rate-limit)
+✅ Mongo Sanitization  — Anti-NoSQL query injection layer
+✅ Input Sanitization  — Custom deep-scan middleware filtering malicious keys
+✅ JWT Auth            — Stateless, token-based sessions with robust verification
+✅ Bcrypt Hashing      — Salts & hashes database credentials (10 rounds)
+✅ CORS Policy         — Dynamic client origin check allowlist
+✅ CastError Capture   — Converts Mongoose ObjectID cast exceptions to 400 Bad Request
+✅ Token Expire Guards — Explicitly handles JWT token expirations & signature validation
+✅ Subdocument Safety  — Full null-checks on nested message sub-records during updates
 ```
 
 ---

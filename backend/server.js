@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
+import 'dotenv/config'; // MUST be first: loads env vars before any module reads process.env
 import mongoose from 'mongoose';
 
 import app from './app.js';
 import { connectDB } from './config/db.js';
 
-dotenv.config();
 
 process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');

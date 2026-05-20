@@ -1,7 +1,7 @@
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
-const DEFAULT_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 60000);
+const getOllamaBaseUrl = () => process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
+const DEFAULT_TIMEOUT_MS = () => Number(process.env.OLLAMA_TIMEOUT_MS || 60000);
 
-const withTimeout = async (url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) => {
+const withTimeout = async (url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS()) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -41,7 +41,7 @@ const parseJsonResponse = async (response) => {
 };
 
 export const getOllamaStatus = async () => {
-    const response = await withTimeout(`${OLLAMA_BASE_URL}/api/tags`, {}, 10000);
+    const response = await withTimeout(`${getOllamaBaseUrl()}/api/tags`, {}, 10000);
     if (!response.ok) {
         const err = new Error('Ollama is not responding correctly');
         err.statusCode = 503;
@@ -52,7 +52,7 @@ export const getOllamaStatus = async () => {
 };
 
 export const getOllamaModels = async () => {
-    const response = await withTimeout(`${OLLAMA_BASE_URL}/api/tags`, {}, 5000);
+    const response = await withTimeout(`${getOllamaBaseUrl()}/api/tags`, {}, 5000);
     const data = await parseJsonResponse(response);
 
     if (!response.ok) {
@@ -65,7 +65,7 @@ export const getOllamaModels = async () => {
 };
 
 export const generateOllamaReply = async ({ model, prompt, stream = false }) => {
-    const response = await withTimeout(`${OLLAMA_BASE_URL}/api/generate`, {
+    const response = await withTimeout(`${getOllamaBaseUrl()}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, prompt, stream }),

@@ -1,0 +1,25 @@
+# Render Blueprint Specification for Chatterbot AI Chatbot Monolith
+# Deploy to Render by connecting your repository and choosing this blueprint.
+
+services:
+  - type: web
+    name: chatterbot-ai
+    env: node
+    plan: free # Standard free tier web service
+    buildCommand: npm run install-all && npm run build-frontend
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false # Set this value in your Render dashboard
+      - key: JWT_SECRET
+        generateValue: true # Generates a random secure token automatically
+      - key: OPENROUTER_API_KEY
+        sync: false # Set your OpenRouter API key here
+      - key: OPENROUTER_MODEL
+        value: google/gemini-2.0-flash
+      - key: FRONTEND_URL
+        value: https://chatterbot-ai.onrender.com # Update with actual Render deployment URL
