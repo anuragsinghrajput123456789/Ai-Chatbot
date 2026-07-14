@@ -46,6 +46,8 @@ const ChatInterface = ({
     const chatSettings = useChatSettings();
     const location = useLocation();
 
+    console.log("ChatInterface messages prop:", messages);
+
     // Close dropdown on outside click
     const dropdownRef = useRef(null);
     const actionsRef = useRef(null);
@@ -356,7 +358,7 @@ const ChatInterface = ({
                                 initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
-                                className="mt-8 text-center text-4xl font-black tracking-tight text-gradient animate-float"
+                                className="mt-8 text-center text-4xl font-black tracking-tight text-gradient"
                             >
                                 How can I help you today?
                             </motion.h2>

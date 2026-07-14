@@ -36,7 +36,7 @@
 
   @keyframes float {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-16px) rotate(1deg); }
+    50% { transform: translateY(-2px) rotate(0.5deg); }
   }
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
@@ -253,8 +253,8 @@ body {
 
 /* Double-Layer Ultra-Premium Glassmorphism with GPU layer promotion */
 .glass-panel {
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
   background-color: rgba(255, 255, 255, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow: 
@@ -262,13 +262,13 @@ body {
     inset 0 1px 1px rgba(255, 255, 255, 0.5),
     0 0 1px rgba(0, 0, 0, 0.05);
   transform: translate3d(0, 0, 0);
-  will-change: transform, backdrop-filter;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
 .glass-panel-dark {
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
   background-color: rgba(6, 10, 22, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 
@@ -276,26 +276,26 @@ body {
     inset 0 1px 0px rgba(255, 255, 255, 0.08),
     0 0 1px rgba(255, 255, 255, 0.05);
   transform: translate3d(0, 0, 0);
-  will-change: transform, backdrop-filter;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
 .glass-heavy {
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
   background: linear-gradient(135deg, rgba(13, 18, 35, 0.85) 0%, rgba(6, 10, 22, 0.95) 100%);
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 
     0 30px 60px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
   transform: translate3d(0, 0, 0);
-  will-change: transform, backdrop-filter;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
 .light .glass-heavy {
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(12px) saturate(200%);
+  -webkit-backdrop-filter: blur(12px) saturate(200%);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(245, 247, 250, 0.95) 100%);
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 
@@ -305,24 +305,24 @@ body {
 
 /* Glassmorphic Navbar Headers */
 .glass-navbar {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   background-color: rgba(255, 255, 255, 0.7);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.01);
   transform: translate3d(0, 0, 0);
-  will-change: transform, backdrop-filter;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
 .glass-navbar-dark {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   background-color: rgba(6, 10, 22, 0.7);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   transform: translate3d(0, 0, 0);
-  will-change: transform, backdrop-filter;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
@@ -444,9 +444,25 @@ body {
   50% { height: 16px; }
 }
 
-/* Native Hardware-Accelerated Smooth Scroll */
-html {
-  scroll-behavior: smooth;
+/* Lenis Scroll Engine Reset & Overrides */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
 
 /* GPU-Accelerated Backdrop Elements to bypass Repaint storm during scroll */
@@ -456,4 +472,27 @@ html {
   backface-visibility: hidden;
 }
 
+/* High-Performance Translucent Panels without Expensive Backdrop-Filter Blurs */
+.card-panel {
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.02), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    0 0 1px rgba(0, 0, 0, 0.05);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
 
+.card-panel-dark {
+  background-color: rgba(13, 20, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.35), 
+    inset 0 1px 0px rgba(255, 255, 255, 0.08),
+    0 0 1px rgba(255, 255, 255, 0.05);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}

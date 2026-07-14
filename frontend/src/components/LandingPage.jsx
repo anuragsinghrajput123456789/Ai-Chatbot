@@ -103,16 +103,16 @@ const LandingPage = ({ isDarkMode, toggleDarkMode, user }) => {
         <div className={`flex min-h-screen w-full flex-col overflow-x-hidden font-sans transition-colors duration-500 relative z-10 ${currentThemeClass} ${isDarkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"}`}>
             
             {/* Cinematic depth panning digital grid backdrop */}
-            <div className="cinematic-grid animate-grid-pan" style={{ willChange: "background-position" }} />
+            <div className="cinematic-grid animate-grid-pan" />
             
             {/* Drifting colorful aura underlays that shift automatically */}
             <div 
-                className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full filter blur-[130px] opacity-25 mix-blend-screen pointer-events-none transition-all duration-1000 animate-drift-bg-mesh" 
-                style={{ backgroundColor: "var(--mode-gradient-from)", willChange: "transform" }}
+                className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full opacity-25 pointer-events-none transition-all duration-1000 animate-drift-bg-mesh" 
+                style={{ background: "radial-gradient(circle, var(--mode-gradient-from) 0%, transparent 70%)", willChange: "transform" }}
             />
             <div 
-                className="absolute bottom-12 left-[-10%] w-[500px] h-[500px] rounded-full filter blur-[110px] opacity-20 mix-blend-screen pointer-events-none transition-all duration-1000 animate-drift-bg-mesh" 
-                style={{ backgroundColor: "var(--mode-gradient-to)", animationDelay: "-6s", willChange: "transform" }}
+                className="absolute bottom-12 left-[-10%] w-[500px] h-[500px] rounded-full opacity-20 pointer-events-none transition-all duration-1000 animate-drift-bg-mesh" 
+                style={{ background: "radial-gradient(circle, var(--mode-gradient-to) 0%, transparent 70%)", animationDelay: "-6s", willChange: "transform" }}
             />
 
             <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} user={user} activeMode={activeMode} />
@@ -207,10 +207,10 @@ const LandingPage = ({ isDarkMode, toggleDarkMode, user }) => {
                         {/* Interactive Live Sandbox Terminal Simulator */}
                         <motion.div
                             variants={itemVariants}
-                            className={`w-full max-w-xl rounded-2xl border p-4 shadow-2xl glass-panel-dark text-left relative overflow-hidden ${
+                            className={`w-full max-w-xl rounded-2xl border p-4 shadow-2xl text-left relative overflow-hidden ${
                                 isDarkMode 
-                                    ? "border-slate-850/80 bg-[#070b16]/75" 
-                                    : "border-slate-250 bg-white/90"
+                                    ? "card-panel-dark border-slate-850/80 bg-[#070b16]/75" 
+                                    : "card-panel border-slate-250 bg-white/95"
                             }`}
                         >
                             <div className="mb-3.5 flex items-center justify-between px-1 border-b border-slate-900/10 dark:border-white/5 pb-2.5">
@@ -410,7 +410,7 @@ const MiniStat = ({ value, label, desc, isDarkMode, isInteractive }) => (
     <div className={`rounded-2xl p-4 text-center transition-all duration-300 ${
         isInteractive ? "hover:scale-108 hover:-translate-y-1.5 cursor-pointer active:scale-98 shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] border-purple-500/40" : "hover:scale-105 hover:-translate-y-1"
     } border glowing-border ${
-        isDarkMode ? "glass-panel-dark border-slate-850/60 bg-slate-950/40" : "glass-panel border-slate-200/50 bg-white"
+        isDarkMode ? "card-panel-dark border-slate-850/60 bg-slate-950/40" : "card-panel border-slate-200/50 bg-white"
     }`}>
         <p className="text-2xl font-black text-gradient leading-none">{value}</p>
         <p className={`mt-2.5 text-[9px] font-black uppercase tracking-widest leading-none ${isDarkMode ? "text-slate-350" : "text-slate-800"}`}>{label}</p>
@@ -427,8 +427,8 @@ const FeatureCard = ({ Icon, title, desc, isDarkMode }) => (
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
         className={`rounded-3xl p-8 border shadow-xl relative overflow-hidden transition-all duration-300 holographic-surface glowing-border ${
             isDarkMode 
-                ? "glass-panel-dark border-slate-900 text-white hover:border-purple-500/25 shadow-black/40" 
-                : "glass-panel border-slate-200 text-slate-950 hover:border-purple-500/15"
+                ? "card-panel-dark border-slate-900 text-white hover:border-purple-500/25 shadow-black/40" 
+                : "card-panel border-slate-200 text-slate-950 hover:border-purple-500/15"
         }`}
     >
         {/* subtle floating background glowing point */}

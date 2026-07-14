@@ -34,7 +34,7 @@ const Footer = ({ isDarkMode }) => {
                         <div className="flex items-center gap-3.5">
                             <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 border border-slate-800 shadow-inner overflow-hidden holographic-surface glowing-border">
                                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-600 opacity-25" />
-                                <img src="/bot-logo.png" alt="Bot Logo" className="h-6 w-6 object-contain relative z-10 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] animate-float" />
+                                <img src="/bot-logo.png" alt="Bot Logo" className="h-6 w-6 object-contain relative z-10 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
                             </div>
                             <div>
                                 <p className={`text-lg font-black tracking-tight ${isDarkMode ? "text-white" : "text-slate-950"}`}>Chatterbot</p>

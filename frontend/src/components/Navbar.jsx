@@ -164,7 +164,7 @@ const Navbar = ({
                         }`} />
                         {/* Rotating external logo ring overlay */}
                         <div className="absolute inset-1 rounded-xl border border-dashed border-purple-500/30 animate-spin-slow pointer-events-none" />
-                        <img src="/bot-logo.png" alt="Bot Logo" className="h-7 w-7 object-contain relative z-10 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] animate-float" />
+                        <img src="/bot-logo.png" alt="Bot Logo" className="h-7 w-7 object-contain relative z-10 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
                     </div>
                     <div className="min-w-0">
                         <h1 className={`truncate text-xl font-black tracking-tight ${isDarkMode ? "text-white" : "text-slate-950"} group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-500 group-hover:bg-clip-text group-hover:text-transparent transition-all`}>
@@ -269,7 +269,7 @@ const Navbar = ({
                                     to="/chat"
                                     className="relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2.5 text-xs font-black uppercase tracking-widest text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all hover:shadow-[0_0_22px_rgba(168,85,247,0.55),0_0_8px_rgba(236,72,153,0.35)] shrink-0"
                                 >
-                                    <Bot className="h-3.5 w-3.5 text-white animate-float" />
+                                    <Bot className="h-3.5 w-3.5 text-white" />
                                     <span>Chat Core</span>
                                 </Link>
                             )}

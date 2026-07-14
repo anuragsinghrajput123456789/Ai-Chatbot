@@ -94,21 +94,21 @@ const Layout = ({
         <div className={`flex h-[100dvh] w-full overflow-hidden transition-colors duration-500 relative z-10 ${currentThemeClass} ${isDarkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"}`}>
             
             {/* Immersive cinematic grid background with slow pan animation */}
-            <div className="cinematic-grid animate-grid-pan" style={{ willChange: "background-position" }} />
+            <div className="cinematic-grid animate-grid-pan" />
 
             {/* Glowing active mode drifting backdrops that shift with selection */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
                 <div 
-                    className="absolute top-[-20%] left-[5%] w-[650px] h-[650px] rounded-full blur-[140px] opacity-[0.32] dark:opacity-[0.24] animate-drift-bg-mesh transition-all duration-1000" 
+                    className="absolute top-[-20%] left-[5%] w-[650px] h-[650px] rounded-full opacity-[0.32] dark:opacity-[0.24] animate-drift-bg-mesh transition-all duration-1000" 
                     style={{ 
-                        backgroundColor: "var(--mode-gradient-from)",
+                        background: "radial-gradient(circle, var(--mode-gradient-from) 0%, transparent 70%)",
                         willChange: "transform, opacity"
                     }}
                 />
                 <div 
-                    className="absolute bottom-[-20%] right-[3%] w-[750px] h-[750px] rounded-full blur-[160px] opacity-[0.28] dark:opacity-[0.2] animate-drift-bg-mesh transition-all duration-1000" 
+                    className="absolute bottom-[-20%] right-[3%] w-[750px] h-[750px] rounded-full opacity-[0.28] dark:opacity-[0.2] animate-drift-bg-mesh transition-all duration-1000" 
                     style={{ 
-                        backgroundColor: "var(--mode-gradient-to)",
+                        background: "radial-gradient(circle, var(--mode-gradient-to) 0%, transparent 70%)",
                         animationDelay: "-8s",
                         willChange: "transform, opacity"
                     }}
@@ -129,7 +129,7 @@ const Layout = ({
                             <div className={`absolute inset-0 bg-gradient-to-tr opacity-25 group-hover:opacity-40 transition-opacity ${
                                 activeMode ? varModeColor(activeMode) : "from-purple-600 to-pink-600"
                             }`} />
-                            <img src="/bot-logo.png" alt="Logo" className="h-6 w-6 object-contain relative z-10 animate-float" />
+                            <img src="/bot-logo.png" alt="Logo" className="h-6 w-6 object-contain relative z-10" />
                         </div>
                     </Link>
 
