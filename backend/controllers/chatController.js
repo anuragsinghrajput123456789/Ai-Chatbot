@@ -1,7 +1,6 @@
 import User from '../models/User.js';
 import Chat from '../models/Chat.js';
 import { generateGeminiReply } from '../services/geminiService.js';
-import { generateOllamaReply, getOllamaModels } from '../services/ollamaService.js';
 
 export const getChatList = async (req, res, next) => {
     try {
@@ -19,6 +18,9 @@ export const getChatHistory = async (req, res, next) => {
     try {
         if (!req.user?.id) return res.json([]);
         const { chatId } = req.params;
+        if (!/^[a-f\d]{24}$/i.test(chatId)) {
+            return res.status(400).json({ error: 'Invalid chat ID format' });
+        }
         const chat = await Chat.findOne({ _id: chatId, userId: req.user.id });
         return res.json(chat?.messages || []);
     } catch (err) {
@@ -32,7 +34,12 @@ export const sendMessage = async (req, res, next) => {
         const cleanMessage = message?.trim();
 
         if (!cleanMessage) return res.status(400).json({ error: 'Message is required' });
-        if (mode === 'offline' && !modelName) return res.status(400).json({ error: 'Model name is required in offline mode' });
+        if (cleanMessage.length > 10000) return res.status(400).json({ error: 'Message cannot exceed 10,000 characters' });
+        if (mode === 'offline') return res.status(400).json({ error: 'Offline mode is handled client-side. Do not send offline requests to the backend.' });
+
+        if (chatId && !/^[a-f\d]{24}$/i.test(chatId)) {
+            return res.status(400).json({ error: 'Invalid chat ID format' });
+        }
 
         let chat = null;
         const historyMessages = [];
@@ -44,7 +51,7 @@ export const sendMessage = async (req, res, next) => {
             if (!user) {
                 req.user = null;
             } else {
-                if (chatId && /^[a-f\d]{24}$/i.test(chatId)) {
+                if (chatId) {
                     chat = await Chat.findOne({ _id: chatId, userId: req.user.id });
                 }
                 if (!chat) {
@@ -62,37 +69,12 @@ export const sendMessage = async (req, res, next) => {
 
         let botReply = '';
 
-        if (mode === 'offline') {
-            try {
-                // Build a structured, context-aware prompt with history memory for the offline Ollama model
-                let fullPrompt = "";
-                if (systemPrompt) {
-                    fullPrompt += `${systemPrompt}\n\n`;
-                }
-                
-                if (historyMessages && historyMessages.length > 0) {
-                    historyMessages.forEach(msg => {
-                        const speaker = msg.role === 'user' ? 'User' : 'Assistant';
-                        fullPrompt += `${speaker}: ${msg.text}\n`;
-                    });
-                }
-                
-                fullPrompt += `User: ${cleanMessage}\nAssistant:`;
-
-                botReply = await generateOllamaReply({ model: modelName, prompt: fullPrompt, stream: false });
-            } catch (err) {
-                if (err.statusCode === 503 || err.message.includes('locally')) return res.status(503).json({ error: 'Ollama is not running. Please start Ollama locally.' });
-                if (err.statusCode === 404 || err.message.includes('not installed')) return res.status(404).json({ error: `Model is not installed. Please install it with: ollama pull ${modelName}` });
-                return res.status(500).json({ error: 'Failed to generate response from Ollama' });
-            }
-        } else {
-            try {
-                botReply = await generateGeminiReply({ messages: historyMessages, message: cleanMessage, systemPrompt });
-            } catch (err) {
-                if (err.statusCode === 503) return res.status(503).json({ error: 'AI service is temporarily unavailable. Please try again.' });
-                if (err.statusCode === 502) return res.status(502).json({ error: 'AI returned an empty response. Please retry.' });
-                return res.status(err.statusCode || 500).json({ error: err.message || 'Failed to generate AI response' });
-            }
+        try {
+            botReply = await generateGeminiReply({ messages: historyMessages, message: cleanMessage, systemPrompt });
+        } catch (err) {
+            if (err.statusCode === 503) return res.status(503).json({ error: 'AI service is temporarily unavailable. Please try again.' });
+            if (err.statusCode === 502) return res.status(502).json({ error: 'AI returned an empty response. Please retry.' });
+            return res.status(err.statusCode || 500).json({ error: err.message || 'Failed to generate AI response' });
         }
 
         if (chat) {
@@ -123,15 +105,6 @@ export const sendMessage = async (req, res, next) => {
     }
 };
 
-export const getOllamaModelsList = async (req, res, next) => {
-    try {
-        const models = await getOllamaModels();
-        return res.json(models);
-    } catch (err) {
-        if (err.statusCode === 503 || err.message.includes('locally')) return res.status(503).json({ error: 'Ollama is not running.' });
-        return next(err);
-    }
-};
 
 export const updateChatMessage = async (req, res, next) => {
     try {
@@ -178,6 +151,9 @@ export const renameChat = async (req, res, next) => {
     try {
         const { chatId } = req.params;
         const { title } = req.body;
+        if (!/^[a-f\d]{24}$/i.test(chatId)) {
+            return res.status(400).json({ error: 'Invalid chat ID format' });
+        }
         if (!title?.trim()) return res.status(400).json({ error: 'Title is required' });
 
         const chat = await Chat.findOneAndUpdate({ _id: chatId, userId: req.user.id }, { title: title.trim() }, { new: true });
@@ -195,6 +171,9 @@ export const deleteChatHistory = async (req, res, next) => {
         const { chatId } = req.params;
         
         if (chatId) {
+            if (!/^[a-f\d]{24}$/i.test(chatId)) {
+                return res.status(400).json({ error: 'Invalid chat ID format' });
+            }
             await Chat.findOneAndDelete({ _id: chatId, userId: req.user.id });
             return res.json({ message: 'Chat history deleted successfully' });
         } else {

@@ -46,8 +46,6 @@ const ChatInterface = ({
     const chatSettings = useChatSettings();
     const location = useLocation();
 
-    console.log("ChatInterface messages prop:", messages);
-
     // Close dropdown on outside click
     const dropdownRef = useRef(null);
     const actionsRef = useRef(null);
@@ -544,7 +542,7 @@ const ChatInterface = ({
                                                                 <ReactMarkdown
                                                                     remarkPlugins={[remarkGfm]}
                                                                     components={{
-                                                                        code({ node, className, children, ...props }) {
+                                                                        code({ node: _node, className, children, ...props }) {
                                                                             const match = /language-(\w+)/.exec(className || "");
                                                                             const isInline = !match && !String(children).includes('\n');
                                                                             const codeContent = String(children).replace(/\n$/, "");
@@ -601,9 +599,9 @@ const ChatInterface = ({
                                                                                 </code>
                                                                             );
                                                                         },
-                                                                        table: ({node, ...props}) => <div className="overflow-x-auto my-6"><table className="min-w-full divide-y divide-slate-800 border border-slate-800 rounded-xl" {...props} /></div>,
-                                                                        th: ({node, ...props}) => <th className="px-5 py-3 bg-slate-900 text-left text-xs font-black uppercase tracking-widest text-slate-400" {...props} />,
-                                                                        td: ({node, ...props}) => <td className="px-5 py-3 border-t border-slate-800 text-sm font-semibold" {...props} />
+                                                                        table: ({node: _node, ...props}) => <div className="overflow-x-auto my-6"><table className="min-w-full divide-y divide-slate-800 border border-slate-800 rounded-xl" {...props} /></div>,
+                                                                        th: ({node: _node, ...props}) => <th className="px-5 py-3 bg-slate-900 text-left text-xs font-black uppercase tracking-widest text-slate-400" {...props} />,
+                                                                        td: ({node: _node, ...props}) => <td className="px-5 py-3 border-t border-slate-800 text-sm font-semibold" {...props} />
                                                                     }}
                                                                 >
                                                                     {msg.text}
@@ -1044,20 +1042,20 @@ const OfflineSetupGuide = ({ isDarkMode }) => {
                 : "border-purple-200 bg-purple-50/50 text-slate-700"
         }`}>
             <p className="text-xs opacity-90 mb-4 leading-relaxed font-semibold">
-                Ollama allows you to deploy state-of-the-art weights (Llama 3, Gemma) locally on your GPU. Follow this terminal playbook to synchronize nodes:
+                Offline mode runs AI entirely on <strong>your computer</strong> using Ollama. Your conversations never leave your machine — 100% private and local.
             </p>
             <ol className="space-y-4 text-xs font-medium">
                 <li className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <div className="flex items-center gap-2">
                         <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400 font-bold">1</span>
-                        <span>Download Ollama installer from</span>
+                        <span>Install Ollama on your computer from</span>
                     </div>
                     <a className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors font-extrabold ml-8 sm:ml-0" href="https://ollama.com/download" target="_blank" rel="noreferrer">ollama.com</a>
                 </li>
                 <li className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400 font-bold">2</span>
-                        <span>Boot local core server in background:</span>
+                        <span>Start Ollama (it runs in the background automatically on most systems):</span>
                     </div>
                     <div className="ml-8">
                         <CopyableCommand command="ollama serve" isDarkMode={isDarkMode} />
@@ -1066,19 +1064,26 @@ const OfflineSetupGuide = ({ isDarkMode }) => {
                 <li className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400 font-bold">3</span>
-                        <span>Pull LLM model parameter tag:</span>
+                        <span>Download a model (pick any you prefer):</span>
                     </div>
-                    <div className="ml-8">
+                    <div className="ml-8 space-y-2">
                         <CopyableCommand command="ollama pull llama3" isDarkMode={isDarkMode} />
+                        <CopyableCommand command="ollama pull gemma3" isDarkMode={isDarkMode} />
+                        <CopyableCommand command="ollama pull mistral" isDarkMode={isDarkMode} />
                     </div>
                 </li>
                 <li className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                         <span className="flex shrink-0 h-6 w-6 items-center justify-center rounded-full bg-purple-500/20 text-xs text-purple-400 font-bold">4</span>
-                        <span>Switch active AI Provider at the top to <strong className="text-purple-400 font-black">Local Node</strong> to route queries to Ollama.</span>
+                        <span>Switch the AI Provider above to <strong className="text-purple-400 font-black">Local Ollama</strong> and select your model to start chatting.</span>
                     </div>
                 </li>
             </ol>
+            <div className={`mt-4 rounded-xl border p-3 text-[10px] font-bold ${
+                isDarkMode ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-300" : "border-emerald-200 bg-emerald-50 text-emerald-700"
+            }`}>
+                🔒 <strong>Privacy:</strong> No ngrok, no remote servers, no developer-hosted Ollama. All inference runs on your machine. Your conversations are never sent anywhere.
+            </div>
         </div>
     );
 };

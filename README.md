@@ -105,7 +105,7 @@
   <tr>
     <td>🔌</td>
     <td><strong>Offline Mode (Ollama)</strong></td>
-    <td>100% on-device AI routing to local parameters (Llama3, Gemma) via a responsive collapsible sub-header setup panel (`ChatModePanel`).</td>
+    <td>100% on-device AI — the browser talks directly to the user's local Ollama at <code>localhost:11434</code>. No ngrok, no remote servers. Conversations never leave the user's machine.</td>
   </tr>
   <tr>
     <td>🤖</td>
@@ -186,8 +186,7 @@ Ai_chatbot/
 │   │
 │   ├── 📂 controllers/
 │   │   ├── authController.js          # Login, signup, token logic
-│   │   ├── chatController.js          # Gemini AI chat handler
-│   │   └── ollamaController.js        # Ollama local AI handler
+│   │   └── chatController.js          # Gemini AI chat handler
 │   │
 │   ├── 📂 middlewares/
 │   │   ├── authMiddleware.js          # JWT verification guard
@@ -201,12 +200,10 @@ Ai_chatbot/
 │   │
 │   ├── 📂 routes/
 │   │   ├── auth.js                    # /api/auth/* routes
-│   │   ├── chat.js                    # /api/chat/* routes
-│   │   └── ollama.js                  # /api/ollama/* routes
+│   │   └── chat.js                    # /api/chat/* routes
 │   │
 │   ├── 📂 services/
-│   │   ├── geminiService.js           # Google Gemini API integration
-│   │   └── ollamaService.js           # Ollama local LLM integration
+│   │   └── geminiService.js           # Google Gemini API integration
 │   │
 │   ├── app.js                         # Express app configuration
 │   ├── server.js                      # Server entry point
@@ -334,28 +331,39 @@ Chatterbot connects to **Google Gemini 1.5** for powerful cloud-based AI respons
 
 Run AI **100% locally** on your machine — no internet required, no data sent anywhere.
 
-**Setup:**
+**Architecture:**
+
+```
+React (Vercel) → User's Local Ollama (http://localhost:11434) → Local LLM
+```
+
+The browser communicates **directly** with your local Ollama instance. The Express backend is never involved in offline inference. No ngrok, no developer-hosted Ollama server, no tunneling.
+
+**Setup (each user does this on their own computer):**
 
 ```bash
 # 1. Install Ollama
 # Download from https://ollama.com and install
 
-# 2. Pull a model (e.g., Llama 3)
+# 2. Pull a model (pick any you prefer)
 ollama pull llama3
+ollama pull gemma3     # alternative
+ollama pull mistral    # alternative
 
-# 3. Start Ollama server
+# 3. Start Ollama (runs in the background automatically on most systems)
 ollama serve
-# Runs on http://localhost:11434
 ```
 
 4. Select **Offline Mode** in the Navbar toggle
-5. Start chatting privately, on-device ✅
+5. Choose your installed model and start chatting privately ✅
 
 **Features in Offline Mode:**
-- Completely air-gapped — no external API calls
-- Supports any Ollama-compatible model (Llama3, Mistral, Phi-3, etc.)
-- Ideal for private/sensitive use cases
+- Completely air-gapped — no external API calls, no backend involvement
+- Browser talks directly to `localhost:11434`
+- Supports any Ollama-compatible model (Llama3, Gemma, Mistral, Phi-3, etc.)
+- Ideal for private/sensitive use cases — conversations never leave your machine
 - Works without a MongoDB connection
+- No ngrok required. No developer-hosted Ollama server required.
 
 ---
 
@@ -378,41 +386,46 @@ Chatterbot offers **4 specialized AI personas**, each with custom system prompts
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Register new user | ❌ |
+| `POST` | `/api/auth/register` | Register new user (with alphanumeric validation) | ❌ |
 | `POST` | `/api/auth/login` | Login & receive JWT | ❌ |
-| `GET` | `/api/auth/me` | Get logged-in user profile | ✅ |
+| `PATCH` | `/api/auth/profile/avatar` | Update user avatar character identifier | ✅ |
 
 ### Chat Routes — `/api/chat`
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `POST` | `/api/chat/send` | Send message to Gemini AI | ✅ |
-| `GET` | `/api/chat/history` | Fetch chat history | ✅ |
-| `DELETE` | `/api/chat/clear` | Clear all chat history | ✅ |
+| `POST` | `/api/chat/` | Send message to AI & retrieve session payload | Optional (Guests support) |
+| `GET` | `/api/chat/` | Fetch list of user chat sessions | ✅ |
+| `GET` | `/api/chat/:chatId` | Retrieve chat message history for specific session | ✅ |
+| `PATCH` | `/api/chat/:chatId/title` | Rename chat session title | ✅ |
+| `DELETE` | `/api/chat/:chatId` | Delete specific chat session history | ✅ |
+| `DELETE` | `/api/chat/` | Delete all chat history sessions | ✅ |
+| `PATCH` | `/api/chat/messages/:messageId` | Update text content of a specific message | ✅ |
+| `DELETE` | `/api/chat/messages/:messageId` | Delete a specific message | ✅ |
 
-### Ollama Routes — `/api/ollama`
-
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `POST` | `/api/ollama/chat` | Send message to local Ollama model | ❌ |
+> **Note:** Offline mode (Ollama) does not use any backend API routes. The browser communicates directly with the user's local Ollama instance at `http://localhost:11434`.
 
 ---
 
-## 🛡️ Security Features & Exception Safety
+## 🛡️ Security Features & Production Hardening
 
 Chatterbot is built with **production-grade security** and exceptional resilience:
 
 ```
-✅ Helmet.js           — Secure HTTP headers (XSS, clickjacking protection)
-✅ Rate Limiting       — Max 500 requests per 15 min per IP (express-rate-limit)
-✅ Mongo Sanitization  — Anti-NoSQL query injection layer
-✅ Input Sanitization  — Custom deep-scan middleware filtering malicious keys
-✅ JWT Auth            — Stateless, token-based sessions with robust verification
-✅ Bcrypt Hashing      — Salts & hashes database credentials (10 rounds)
-✅ CORS Policy         — Dynamic client origin check allowlist
-✅ CastError Capture   — Converts Mongoose ObjectID cast exceptions to 400 Bad Request
-✅ Token Expire Guards — Explicitly handles JWT token expirations & signature validation
-✅ Subdocument Safety  — Full null-checks on nested message sub-records during updates
+✅ Sequential Booting   — Backend awaits MongoDB connection before listening for HTTP traffic, preventing half-boot states
+✅ Connection Resiliency — Database connection timeout set to 5s to fail-fast and allow instant Docker/Render restarts
+✅ Helmet.js Security    — Strict HTTP security headers (anti-clickjacking and XSS defenses)
+✅ Compression           — Gzip compression middleware registered on the Express backend for high-speed content delivery
+✅ Morgan Logger         — Request logging setup for diagnostic ease in development
+✅ Rate Limiting         — Max 500 requests per 15 min per IP to prevent DDoS and API resource drain
+✅ NoSQL Sanitization    — Anti-NoSQL query injection layer checking bodies, params, and request queries
+✅ Input Validations     — Alphanumeric/length username checks, email format validation, and max 10k message character limits
+✅ Chat ID Sanitization  — Hexadecimal 24-character validation on MongoDB ObjectIds to prevent raw CastErrors
+✅ AI Timeout Safety     — 15-second AbortSignals on all backend API fetches (Gemini/OpenRouter) to prevent hanging tasks
+✅ Code-Splitting        — Frontend built with Vite manual Rollup chunks for optimized caching and fast bundle loads
+✅ 401 Session Interceptor — Auto-logout on token expiration (cleans localStorage and redirect-flushes to login)
+✅ Graceful JSON Parsing — Express SyntaxError handling to prevent malformed payload crashes
+✅ Subdocument Safety    — Complete null-checks and safe deletion models for message arrays
 ```
 
 ---
@@ -428,6 +441,8 @@ Chatterbot is built with **production-grade security** and exceptional resilienc
 | `JWT_SECRET` | ✅ | Secret key for JWT signing |
 | `GEMINI_API_KEY` | ✅ | Google Gemini AI API key |
 | `NODE_ENV` | ✅ | `development` or `production` |
+
+> **Note:** No `OLLAMA_BASE_URL` is needed. Offline mode runs entirely in the user's browser and communicates directly with the user's local Ollama. The backend is not involved in offline inference.
 
 ---
 
@@ -452,6 +467,8 @@ node server.js
 ```
 
 > **Note:** In production, the backend serves the frontend's `dist/` folder as a static SPA from a single origin.
+
+**Offline Mode** requires no server-side deployment — each user installs Ollama on their own computer. See the [Offline Mode](#-offline-mode--ollama) section for details.
 
 ---
 

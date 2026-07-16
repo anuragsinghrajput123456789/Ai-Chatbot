@@ -5,6 +5,19 @@ export const connectDB = async () => {
         throw new Error('MONGO_URI is required');
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB connected');
+    mongoose.connection.on('connected', () => {
+        console.log('MongoDB connection established successfully.');
+    });
+
+    mongoose.connection.on('error', (err) => {
+        console.error(`MongoDB connection error: ${err.message}`);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+        console.warn('MongoDB disconnected! Re-attempting connection...');
+    });
+
+    await mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 5000, // Fail fast (5s) instead of 30s
+    });
 };

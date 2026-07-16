@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { 
     MessageSquarePlus, MessageSquare, Trash2, Edit2, Menu, X, Check, XCircle, Search, 
     Bot, LogOut, Home, HardDrive, Cloud, User as UserIcon, Sparkles, Plus, Settings, ChevronRight
@@ -12,7 +12,7 @@ const AVATARS = ["Bot", "User", "🤖", "😎", "🐱", "🚀", "🧑‍💻", "
 const Layout = ({ 
     children, 
     isDarkMode, 
-    toggleDarkMode, 
+    toggleDarkMode: _toggleDarkMode, 
     activeMode, 
     user, 
     onLogout, 

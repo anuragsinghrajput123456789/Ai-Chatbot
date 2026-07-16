@@ -10,7 +10,7 @@ const AVATARS = ["Bot", "User", "🤖", "😎", "🐱", "🚀", "🧑‍💻", "
 const Navbar = ({
     user,
     isDarkMode,
-    toggleDarkMode,
+    toggleDarkMode: _toggleDarkMode,
     activeMode,
     onLogout,
     onClearChat,

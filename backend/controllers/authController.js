@@ -14,9 +14,24 @@ const createToken = (userId) => {
 export const register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
+        const cleanUsername = username?.trim();
+        const cleanEmail = email?.trim().toLowerCase();
 
-        if (!username?.trim() || !email?.trim() || !password?.trim()) {
+        if (!cleanUsername || !cleanEmail || !password?.trim()) {
             return res.status(400).json({ error: 'Username, email, and password are required' });
+        }
+
+        if (cleanUsername.length < 3 || cleanUsername.length > 30) {
+            return res.status(400).json({ error: 'Username must be between 3 and 30 characters' });
+        }
+
+        if (!/^[a-zA-Z0-9_-]+$/.test(cleanUsername)) {
+            return res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, or hyphens' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(cleanEmail)) {
+            return res.status(400).json({ error: 'Invalid email address format' });
         }
 
         if (password.length < 6) {
@@ -25,8 +40,8 @@ export const register = async (req, res, next) => {
 
         const existingUser = await User.findOne({
             $or: [
-                { username: username.trim() },
-                { email: email.trim().toLowerCase() },
+                { username: cleanUsername },
+                { email: cleanEmail },
             ],
         });
 
@@ -36,8 +51,8 @@ export const register = async (req, res, next) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         await User.create({
-            username: username.trim(),
-            email: email.trim().toLowerCase(),
+            username: cleanUsername,
+            email: cleanEmail,
             password: hashedPassword,
         });
 

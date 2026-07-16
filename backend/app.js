@@ -2,13 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import morgan from 'morgan';
+import mongoose from 'mongoose';
 import { mongoSanitize } from './middlewares/sanitizeMiddleware.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chat.js';
-import ollamaRoutes from './routes/ollama.js';
 import { notFound } from './middlewares/notFoundMiddleware.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
 
@@ -16,6 +18,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Production Compression & Request Logging
+app.use(compression());
+if (process.env.NODE_ENV !== 'production') {
+    app.use(morgan('dev'));
+}
 
 // Security Middlewares
 app.use(helmet({ contentSecurityPolicy: false })); // Disable CSP to avoid blocking frontend assets/APIs
@@ -49,16 +57,23 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 app.get('/health', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const states = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting',
+    };
     res.json({
-        status: 'ok',
+        status: dbState === 1 ? 'ok' : 'degraded',
         service: 'ai-chatbot-backend',
+        database: states[dbState] || 'unknown',
         timestamp: new Date().toISOString(),
     });
 });
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/ollama', ollamaRoutes);
 
 // Static file serving for monolith deployment
 if (process.env.NODE_ENV === 'production') {

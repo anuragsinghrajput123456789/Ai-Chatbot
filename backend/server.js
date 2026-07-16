@@ -13,9 +13,13 @@ process.on('uncaughtException', (err) => {
 
 const PORT = process.env.PORT || 5000;
 
-connectDB().catch((err) => {
-    console.error('Database connection failed:', err.message);
-});
+try {
+    console.log('Connecting to MongoDB...');
+    await connectDB();
+} catch (err) {
+    console.error('CRITICAL: Database connection failed. Shutting down...', err.message);
+    process.exit(1);
+}
 
 const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);

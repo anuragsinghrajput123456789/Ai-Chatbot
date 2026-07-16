@@ -21,5 +21,7 @@ services:
         sync: false # Set your OpenRouter API key here
       - key: OPENROUTER_MODEL
         value: google/gemini-2.0-flash
+      - key: GEMINI_API_KEY
+        sync: false # Set your Gemini API key here
       - key: FRONTEND_URL
         value: https://chatterbot-ai.onrender.com # Update with actual Render deployment URL

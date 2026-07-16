@@ -1,4 +1,8 @@
 export const errorHandler = (err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        return res.status(400).json({ error: 'Invalid JSON payload' });
+    }
+
     if (err.message === 'Not allowed by CORS') {
         return res.status(403).json({ error: 'Origin is not allowed by CORS' });
     }
@@ -27,6 +31,6 @@ export const errorHandler = (err, req, res, next) => {
 
     return res.status(statusCode).json({
         error: statusCode === 500 ? 'Server error' : err.message,
-        ...(process.env.NODE_ENV === 'production' ? {} : { details: err.details || err.message }),
+        ...(process.env.NODE_ENV === 'production' ? {} : { details: err.details || err.message, stack: err.stack }),
     });
 };

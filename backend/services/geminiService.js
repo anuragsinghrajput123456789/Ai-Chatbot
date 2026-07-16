@@ -31,7 +31,8 @@ const callNativeGemini = async ({ messages, message, systemPrompt }) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(15000)
         });
 
         const data = await response.json();
@@ -49,7 +50,8 @@ const callNativeGemini = async ({ messages, message, systemPrompt }) => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(15000)
             });
 
             const data = await response.json();
@@ -98,7 +100,8 @@ export const generateGeminiReply = async ({ messages, message, systemPrompt }) =
                     messages: recentMessages,
                     max_tokens: 1500,
                     temperature: 0.7
-                })
+                }),
+                signal: AbortSignal.timeout(15000)
             });
 
             const data = await response.json();
@@ -124,7 +127,8 @@ export const generateGeminiReply = async ({ messages, message, systemPrompt }) =
                         messages: recentMessages,
                         max_tokens: 1500,
                         temperature: 0.7
-                    })
+                    }),
+                    signal: AbortSignal.timeout(15000)
                 });
 
                 const data = await response.json();

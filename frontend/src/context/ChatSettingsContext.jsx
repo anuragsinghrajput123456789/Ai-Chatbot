@@ -62,8 +62,7 @@ export const ChatSettingsProvider = ({ children }) => {
     } finally {
       setIsOllamaLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedOllamaModelRef]);
 
   useEffect(() => {
     if (provider === "offline") {

@@ -11,6 +11,7 @@ import {
   deleteSavedChatMessage, fetchChatList, fetchChatSession, deleteChatHistory, 
   sendMessageToBackend, updateSavedChatMessage, deleteChatSession, renameChatSession, updateUserAvatar 
 } from "./api";
+import { sendOllamaChatMessage } from "./services/ollamaService";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
 function AppRoutes() {
   const GUEST_CHAT_KEY = "guestChatMessages";
   const [activeMode, setActiveMode] = useState("chat");
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const isDarkMode = true;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [chatList, setChatList] = useState([]);
@@ -154,7 +155,7 @@ function AppRoutes() {
       const updatedUser = { ...user, avatar: data.avatar };
       setUser(updatedUser);
       localStorage.setItem("avatar", data.avatar);
-    } catch (err) {
+    } catch {
       alert("Failed to update avatar");
     }
   };
@@ -214,23 +215,39 @@ function AppRoutes() {
       let reply;
 
       if (provider === "offline") {
-        if (!ollamaStatus.running) throw new Error("Please start Ollama locally to use offline mode.");
+        if (!ollamaStatus.running) throw new Error("Please start Ollama on your computer to use offline mode.");
         if (!selectedOllamaModel) throw new Error("Choose or enter an Ollama model before sending.");
         
-        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'offline', selectedOllamaModel, currentChatId);
-        reply = data.reply;
+        // Build Ollama chat messages array (system prompt + conversation history + new user message)
+        const ollamaMessages = [];
 
-        if (user) {
-          if (!currentChatId && data.chatId) {
-            setCurrentChatId(data.chatId);
-            loadChatList(); // Refresh list to get new title
-          }
-          if (data.messages) {
-            setIsTyping(false);
-            setMessages(data.messages);
-            return;
-          }
+        // Add system prompt for the active AI mode
+        const systemPrompt = MODES[activeMode].systemPrompt;
+        if (systemPrompt) {
+          ollamaMessages.push({ role: "system", content: systemPrompt });
         }
+
+        // Add conversation history
+        for (const msg of messages) {
+          ollamaMessages.push({
+            role: msg.role === "user" ? "user" : "assistant",
+            content: msg.text,
+          });
+        }
+
+        // Add current user message
+        ollamaMessages.push({ role: "user", content: userMsg });
+
+        // Call the user's local Ollama directly — never goes to the backend
+        reply = await sendOllamaChatMessage({
+          model: selectedOllamaModel,
+          messages: ollamaMessages,
+        });
+
+        // Offline messages are stored only in local React state (never persisted to the server)
+        setIsTyping(false);
+        setMessages(prev => [...prev, createLocalMessage("model", reply)]);
+        return;
       } else {
         const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'online', null, currentChatId);
         reply = data.reply;
