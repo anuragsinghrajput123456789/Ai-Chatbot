@@ -1,25 +1,40 @@
+const isPlainObject = (val) => {
+    return val !== null && typeof val === 'object' && (Object.getPrototypeOf(val) === Object.prototype || Object.getPrototypeOf(val) === null);
+};
+
 const hasMongoKeys = (obj) => {
     if (!obj || typeof obj !== 'object') return false;
     
+    if (Array.isArray(obj)) {
+        return obj.some(item => hasMongoKeys(item));
+    }
+
     for (const key in obj) {
-        if (key.startsWith('$') || key.includes('.')) return true;
-        if (typeof obj[key] === 'object' && hasMongoKeys(obj[key])) return true;
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            if (key.startsWith('$') || key.includes('.')) return true;
+            if (typeof obj[key] === 'object' && hasMongoKeys(obj[key])) return true;
+        }
     }
     return false;
 };
 
 const sanitize = (obj) => {
-    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+        return obj.map(item => sanitize(item));
+    }
 
-    const newObj = Array.isArray(obj) ? [] : {};
-    
+    if (!isPlainObject(obj)) return obj;
+
+    const newObj = {};
     for (const key in obj) {
-        if (key.startsWith('$') || key.includes('.')) continue;
-        
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-            newObj[key] = sanitize(obj[key]);
-        } else {
-            newObj[key] = obj[key];
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            if (key.startsWith('$') || key.includes('.')) continue;
+            
+            if (typeof obj[key] === 'object' && obj[key] !== null) {
+                newObj[key] = sanitize(obj[key]);
+            } else {
+                newObj[key] = obj[key];
+            }
         }
     }
     return newObj;

@@ -1,18 +1,18 @@
 <div align="center">
 
-<img src="./frontend/public/bot-logo.png" alt="Chatterbot Logo" width="100" height="100" />
+<img src="./frontend/public/bot-logo.png" alt="Chatterbot Logo" width="120" height="120" />
 
-# 🤖 Chatterbot — AI Assistant
+# 🤖 Chatterbot — Ultimate Full-Stack AI Companion
 
-**A production-ready, full-stack AI Chatbot powered by Google Gemini & Ollama**
+**A production-ready, ultra-premium hybrid AI chatbot. Seamlessly transition between Google Gemini cloud-intelligence and 100% private, local Ollama inference.**
 
-[![MIT License](https://img.shields.io/badge/License-MIT-purple.svg)](https://choosealicense.com/licenses/mit/)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)](https://www.mongodb.com/)
-[![Express](https://img.shields.io/badge/Express-5.x-black?logo=express)](https://expressjs.com/)
-[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
-[![Gemini](https://img.shields.io/badge/Gemini-1.5-blue?logo=google)](https://ai.google.dev/)
+[![MIT License](https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge)](https://choosealicense.com/licenses/mit/)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js&style=for-the-badge)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&style=for-the-badge)](https://react.dev/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?logo=tailwindcss&style=for-the-badge)](https://tailwindcss.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&style=for-the-badge)](https://www.mongodb.com/)
+[![Gemini API](https://img.shields.io/badge/Gemini-Pro-blue?logo=google&style=for-the-badge)](https://ai.google.dev/)
+[![Ollama](https://img.shields.io/badge/Ollama-Local-orange?logo=ollama&style=for-the-badge)](https://ollama.com/)
 
 [🌐 Live Demo](#) · [🐛 Report Bug](https://github.com/anuragsinghrajput123456789/Ai-Chatbot/issues) · [✨ Request Feature](https://github.com/anuragsinghrajput123456789/Ai-Chatbot/issues)
 
@@ -20,7 +20,7 @@
 
 ---
 
-## 📸 App Screenshots
+## 📸 App Screenshots & Interface Showcase
 
 <table>
   <tr>
@@ -28,19 +28,19 @@
       <img src="./screenshots/home.png" alt="Home Page - Hero Section" width="100%"/>
       <br/><br/>
       <strong>🏠 Home — Hero Section</strong><br/>
-      <em>Modern landing with animated AI robot, mode switcher, and prompt preview</em>
+      <em>Modern landing page with animated AI robot, mode switcher, and interactive prompt previews.</em>
     </td>
     <td align="center" width="33%">
       <img src="./screenshots/about.png" alt="About Page - Mission" width="100%"/>
       <br/><br/>
       <strong>ℹ️ About — Mission Page</strong><br/>
-      <em>Mission statement, live stats (Gemini 1.5, 10k+ Users, 24/7, 100% Privacy)</em>
+      <em>Clean dashboard showing live stats (Gemini 1.5, 10k+ Users, 24/7, 100% Privacy and Air-gapped options).</em>
     </td>
     <td align="center" width="33%">
       <img src="./screenshots/chat.png" alt="Chat Interface - Online Mode" width="100%"/>
       <br/><br/>
       <strong>💬 Chat — Interface</strong><br/>
-      <em>4 specialized AI modes: Friendly Chat, Code Expert, Study Buddy, Creative Muse</em>
+      <em>Interactive sidebar with chat history, profile customized avatars, and responsive grid layouts.</em>
     </td>
   </tr>
   <tr>
@@ -48,19 +48,19 @@
       <img src="./screenshots/chat.png" alt="Online Mode - Gemini AI" width="100%"/>
       <br/><br/>
       <strong>🌐 Online Mode — Gemini AI</strong><br/>
-      <em>Cloud-powered responses with persistent chat history</em>
+      <em>Cloud-powered responses with persistent chat history, markdown code-block execution, and retry capabilities.</em>
     </td>
     <td align="center" colspan="1">
       <img src="./screenshots/offline.png" alt="Offline Mode - Ollama" width="100%"/>
       <br/><br/>
       <strong>🔌 Offline Mode — Ollama</strong><br/>
-      <em>100% local AI — no internet, no data shared</em>
+      <em>100% local AI — auto-discovers models (Llama3, Gemma, etc.) in the user's host machine. Zero internet dependencies.</em>
     </td>
     <td align="center" colspan="1">
       <img src="./screenshots/modes.png" alt="Chat Mode Selection" width="100%"/>
       <br/><br/>
       <strong>🤖 Chat Mode Selection</strong><br/>
-      <em>Pick from Friendly Chat, Code Expert, Study Buddy, or Creative Muse</em>
+      <em>Pick from 4 specialized prompts: Friendly Chat, Code Expert, Study Buddy, or Creative Muse.</em>
     </td>
   </tr>
 </table>
@@ -69,183 +69,178 @@
 
 ## 🧭 Table of Contents
 
-- [✨ Features](#-features)
-- [⚙️ Tech Stack](#️-tech-stack)
-- [📁 Folder Structure](#-folder-structure)
-- [🚀 Getting Started](#-getting-started)
-- [🌐 Online Mode — Google Gemini](#-online-mode--google-gemini)
-- [🔌 Offline Mode — Ollama](#-offline-mode--ollama)
-- [🤖 AI Chat Modes](#-ai-chat-modes)
-- [🔐 API Routes](#-api-routes)
-- [🛡️ Security Features](#️-security-features)
-- [🌍 Environment Variables](#-environment-variables)
-- [📦 Deployment](#-deployment)
-- [🤝 Contributing](#-contributing)
+1. [✨ Key Features](#-key-features)
+2. [🏗️ Architecture & System Topology](#️-architecture--system-topology)
+3. [⚙️ Technical Stack](#️-technical-stack)
+4. [📁 Folder Structure Mapping](#-folder-structure-mapping)
+5. [🚀 Getting Started](#-getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Cloning & Installing](#1-clone--install-all)
+   - [Environment Configuration](#2-setup-the-backend)
+   - [Running Local Development](#4-run-the-concurrent-dev-servers)
+6. [🌐 Cloud vs. Local Flow Details](#-cloud-vs-local-flow-details)
+7. [🤖 AI Chat Personalities](#-ai-chat-personalities)
+8. [🔐 API Route Specifications](#-api-route-specifications)
+9. [🛡️ Production Hardening & Security](#️-production-hardening--security)
+10. [🏎️ Performance & Rendering Optimizations](#️-performance--rendering-optimizations)
+11. [📦 Deployment Pipeline](#-deployment-pipeline)
+12. [🤝 Contributing](#-contributing)
+13. [📄 License](#-license)
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-<table>
-  <tr>
-    <td>🚀</td>
-    <td><strong>GPU Scroll Acceleration</strong></td>
-    <td>Native browser smooth-scrolling backed by hardware-accelerated compositor layers (`will-change: transform`), guaranteeing 60fps jitter-free layout pans.</td>
-  </tr>
-  <tr>
-    <td>💬</td>
-    <td><strong>Symmetric Conversational UI</strong></td>
-    <td>Redesigned dialogue alignment (User responses right-symmetrical, Bot messages left-aligned inside elegant glassmorphic cards) complete with glowing visual avatars.</td>
-  </tr>
-  <tr>
-    <td>🌐</td>
-    <td><strong>Online Mode (Gemini 2.5/1.5)</strong></td>
-    <td>Blazing-fast cloud-powered intelligence via Google Gemini direct endpoints with OpenRouter API automatic fallbacks.</td>
-  </tr>
-  <tr>
-    <td>🔌</td>
-    <td><strong>Offline Mode (Ollama)</strong></td>
-    <td>100% on-device AI — the browser talks directly to the user's local Ollama at <code>localhost:11434</code>. No ngrok, no remote servers. Conversations never leave the user's machine.</td>
-  </tr>
-  <tr>
-    <td>🤖</td>
-    <td><strong>4 Specialized AI Modes</strong></td>
-    <td>Friendly Chat, Code Expert, Study Buddy, Creative Muse — each automatically injecting system-level behavioral constraints.</td>
-  </tr>
-  <tr>
-    <td>🔐</td>
-    <td><strong>JWT Auth System</strong></td>
-    <td>Stateless secure login & signup with bcrypt password hashing and real-time expiration checks.</td>
-  </tr>
-  <tr>
-    <td>💾</td>
-    <td><strong>Persistent Chat History</strong></td>
-    <td>All user conversational states, titles, and message logs saved securely to Mongoose Atlas collections.</td>
-  </tr>
-  <tr>
-    <td>✍️</td>
-    <td><strong>Markdown Rendering</strong></td>
-    <td>High-fidelity React Markdown + syntax-highlighted code block interpreters with instant copy-to-clipboard microactions.</td>
-  </tr>
-  <tr>
-    <td>🌗</td>
-    <td><strong>Light / Dark Theme</strong></td>
-    <td>Toggle between cinematic dark glassmorphism and crisp light modes seamlessly.</td>
-  </tr>
-  <tr>
-    <td>🛡️</td>
-    <td><strong>Exception Safety & Security</strong></td>
-    <td>Explicit Mongoose CastError catching, JWT token expire guards, mongo-sanitized request vectors, and global error boundaries.</td>
-  </tr>
-</table>
+* **🔌 Hybrid Hybrid Brains**: Toggle between **Google Gemini** cloud-intelligence via REST, and **Local Ollama** (`localhost:11434`) directly from the browser.
+* **🤖 4 Specialized AI Personalities**: System prompts customize behavior dynamically:
+  * **Friendly Chat**: Casual, warm daily conversations.
+  * **Code Expert**: Deep-dive software engineering advisor.
+  * **Study Buddy**: Step-by-step academic explanations and quizzes.
+  * **Creative Muse**: Brainstorming partner for writing, design, and concepts.
+* **💾 Cloud Persistence**: Real-time user state and thread management synchronized to Mongoose MongoDB Atlas collections.
+* **🎨 Ultra-Premium UI**: Glassmorphic elements, backdrop filters (`blur(16px)`), customized robo-avatars, and silky smooth transition animations powered by Framer Motion.
+* **🌗 Intelligent Theme Engine**: Dynamic light/dark settings integrated with state context.
+* **📝 High-Fidelity Markdown Rendering**: Fully parsed markdown outputs with copyable syntax-highlighted code blocks.
+* **🛡️ Hardened Security**: Anti-clickjacking headers, Express rate limits, mongo query sanitizers, password bcrypt-salting, and token-expiry session handlers.
+* **⚡ 60FPS Scroll Acceleration**: Hardware-composited containers (`will-change: transform`) ensure lag-free scrolling during large conversation outputs.
 
 ---
 
-## ⚙️ Tech Stack
+## 🏗️ Architecture & System Topology
 
-### 🖥️ Frontend
+Chatterbot combines the security of a backend database proxy with the absolute privacy of local inference.
 
-| Technology | Version | Purpose |
-|---|---|---|
-| **React** | 19.x | UI Framework |
-| **Vite** | 6.x | Build Tool & Dev Server |
-| **React Router DOM** | 7.x | Client-side Routing |
-| **Framer Motion** | 12.x | Animations & Transitions |
-| **Tailwind CSS** | 4.x | Utility-first Styling |
-| **React Markdown** | 10.x | Markdown Rendering |
-| **React Syntax Highlighter** | 16.x | Code Block Highlighting |
-| **Lucide React** | Latest | Icon Library |
-| **React Icons** | 5.x | Extended Icon Set |
+### System Topology Diagram
 
-### 🔧 Backend
+```mermaid
+graph TD
+    subgraph Client Environment (User's Machine)
+        Browser[React SPA Frontend]
+        Ollama[Local Ollama Server: Port 11434]
+    end
 
-| Technology | Version | Purpose |
-|---|---|---|
-| **Node.js** | 18+ | Runtime Environment |
-| **Express** | 5.x | REST API Framework |
-| **MongoDB** | Atlas | Database |
-| **Mongoose** | 9.x | MongoDB ODM |
-| **JWT** | 9.x | Authentication Tokens |
-| **Bcryptjs** | 3.x | Password Hashing |
-| **@google/genai** | 1.x | Gemini AI SDK |
-| **Helmet** | 8.x | HTTP Security Headers |
-| **express-rate-limit** | 8.x | API Rate Limiting |
-| **express-mongo-sanitize** | 2.x | NoSQL Injection Prevention |
-| **Nodemon** | 3.x | Dev Auto-restart |
+    subgraph Cloud Infrastructure
+        Backend[Express REST API Backend]
+        MongoDB[(MongoDB Atlas Database)]
+        Gemini[Google Gemini API]
+        OpenRouter[OpenRouter API Fallback]
+    end
+
+    %% Online Flow
+    Browser -->|HTTPS / REST| Backend
+    Backend -->|Mongoose ODM| MongoDB
+    Backend -->|HTTPS API Requests| Gemini
+    Backend -->|HTTPS API Fallback| OpenRouter
+
+    %% Offline Flow
+    Browser -->|Direct HTTP Localhost| Ollama
+```
+
+### LLM Orchestration & Fallback Pipeline
+
+In **Online Mode**, requests navigate a high-availability fallback structure:
+
+```mermaid
+graph TD
+    Start[Request Received] --> CheckORKey{OpenRouter Key Configured?}
+    
+    %% OpenRouter Route
+    CheckORKey -->|Yes| CallORPrimary[Call OpenRouter Primary: gemini-2.0-flash]
+    CallORPrimary -->|Success| ReturnResponse[Return Response]
+    CallORPrimary -->|Fail / Timeout| CallORBackup[Call OpenRouter Backup: gemini-1.5-flash]
+    CallORBackup -->|Success| ReturnResponse
+    CallORBackup -->|Fail / Timeout| CallNativePrimary[Call Native Gemini: gemini-2.5-flash]
+    
+    %% Native Gemini Route
+    CheckORKey -->|No| CallNativePrimary
+    CallNativePrimary -->|Success| ReturnResponse
+    CallNativePrimary -->|Fail / Timeout| CallNativeBackup[Call Native Gemini Backup: gemini-1.5-flash]
+    CallNativeBackup -->|Success| ReturnResponse
+    CallNativeBackup -->|Fail / Timeout| ServiceUnavailable[Error: 503 Service Unavailable]
+```
 
 ---
 
-## 📁 Folder Structure
+## ⚙️ Technical Stack
+
+### Frontend Client
+* **React 19.x & Vite 6.x** — Fast client bundles, hot-reloading.
+* **Tailwind CSS v4** — Utility design token rules.
+* **Framer Motion 12.x** — Interactive physics and layout animations.
+* **React Router DOM 7.x** — Multi-page client-side SPA routing.
+* **React Markdown 10.x & React Syntax Highlighter 16.x** — Streamlined code representation.
+* **Lucide React** — High-quality interface glyphs.
+
+### Backend Infrastructure
+* **Node.js 18+ & Express 5.x (Beta)** — Scalable HTTP routing.
+* **MongoDB & Mongoose 9.x** — Data persistence and ODM schema controls.
+* **@google/genai 1.x** — Unified Google Gemini interface.
+* **Helmet v8 & Express Rate Limit v8** — Request filtering and host protection.
+* **Bcryptjs v3 & JSON Web Tokens v9** — Hashed authentication logic.
+* **Compression v1** — Gzip compression proxying.
+
+---
+
+## 📁 Folder Structure Mapping
 
 ```
 Ai_chatbot/
 │
-├── 📂 backend/                        # Express REST API
+├── 📂 backend/                        # Express REST API Server
 │   ├── 📂 config/
-│   │   └── db.js                      # MongoDB connection
+│   │   └── db.js                      # Database connection and retry policies
 │   │
 │   ├── 📂 controllers/
-│   │   ├── authController.js          # Login, signup, token logic
-│   │   └── chatController.js          # Gemini AI chat handler
+│   │   ├── authController.js          # Authentication, user registrations
+│   │   └── chatController.js          # Gemini API interactions, message CRUD
 │   │
 │   ├── 📂 middlewares/
-│   │   ├── authMiddleware.js          # JWT verification guard
-│   │   ├── errorMiddleware.js         # Global error handler
-│   │   ├── notFoundMiddleware.js      # 404 handler
-│   │   └── sanitizeMiddleware.js      # Input sanitization
+│   │   ├── authMiddleware.js          # JWT Verification Guard
+│   │   ├── errorMiddleware.js         # Exception interceptor & status code maps
+│   │   ├── notFoundMiddleware.js      # 404 Route handler
+│   │   └── sanitizeMiddleware.js      # Anti-NoSQL Injection interceptor
 │   │
 │   ├── 📂 models/
-│   │   ├── User.js                    # User schema (name, email, password)
-│   │   └── Chat.js                    # Chat history schema
+│   │   ├── User.js                    # User Model & Password Hash hooks
+│   │   └── Chat.js                    # Persistent chat history schema
 │   │
 │   ├── 📂 routes/
-│   │   ├── auth.js                    # /api/auth/* routes
-│   │   └── chat.js                    # /api/chat/* routes
+│   │   ├── auth.js                    # /api/auth/* bindings
+│   │   └── chat.js                    # /api/chat/* bindings
 │   │
 │   ├── 📂 services/
-│   │   └── geminiService.js           # Google Gemini API integration
+│   │   └── geminiService.js           # External AI API Fallback orchestrator
 │   │
-│   ├── app.js                         # Express app configuration
-│   ├── server.js                      # Server entry point
-│   └── package.json
+│   ├── app.js                         # Middleware piping & asset distribution
+│   └── server.js                      # Entry listener
 │
-├── 📂 frontend/                        # React + Vite SPA
+├── 📂 frontend/                       # React client bundle
 │   ├── 📂 public/
-│   │   └── bot-logo.png               # Custom chatbot brand logo
+│   │   └── bot-logo.png               # Chatterbot branding assets
 │   │
 │   ├── 📂 src/
 │   │   ├── 📂 components/
-│   │   │   ├── Auth.jsx               # Login / Signup modal
-│   │   │   ├── ChatInterface.jsx      # Core chat UI with modes
-│   │   │   ├── ErrorBoundary.jsx      # React error boundary
-│   │   │   ├── Footer.jsx             # Site footer
-│   │   │   ├── KittyBot.jsx           # Animated robot mascot
-│   │   │   ├── LandingPage.jsx        # Hero section component
-│   │   │   ├── Layout.jsx             # Page layout wrapper
-│   │   │   └── Navbar.jsx             # Top navigation bar
+│   │   │   ├── Auth.jsx               # Auth Dialog overlays
+│   │   │   ├── ChatInterface.jsx      # Core conversational screen logic
+│   │   │   ├── ErrorBoundary.jsx      # React exception isolation layout
+│   │   │   ├── KittyBot.jsx           # Animated robot canvas
+│   │   │   ├── LandingPage.jsx        # Landing hero and features grid
+│   │   │   └── Navbar.jsx             # Mode selector toggle controller
 │   │   │
 │   │   ├── 📂 context/
-│   │   │   └── ChatSettingsContext.jsx # Global chat settings state
+│   │   │   └── ChatSettingsContext.jsx # Global states (Auth, Theme, Offline mode)
 │   │   │
 │   │   ├── 📂 pages/
-│   │   │   ├── About.jsx              # About / Mission page
-│   │   │   └── AuthPage.jsx           # Full auth page wrapper
+│   │   │   └── About.jsx              # Mission statement and system stats
 │   │   │
 │   │   ├── 📂 services/
-│   │   │   └── (API service utilities)
+│   │   │   ├── http.js                # Custom axios wrapper with auto-auth headers
+│   │   │   └── ollamaService.js       # Local Ollama client logic
 │   │   │
-│   │   ├── App.jsx                    # Root component + routing
-│   │   ├── api.js                     # Axios API instance
-│   │   ├── constants.js               # App-wide constants
-│   │   ├── index.css                  # Global styles + CSS vars
-│   │   └── main.jsx                   # React DOM entry point
-│   │
-│   ├── index.html                     # HTML entry point
-│   ├── vite.config.js                 # Vite configuration
-│   ├── vercel.json                    # Vercel deployment config
+│   │   ├── App.jsx                    # Route mapping
+│   │   ├── index.css                  # Global tailwind configurations & variables
+│   │   └── main.jsx                   # DOM initialization
 │   └── package.json
-│
-└── README.md
 ```
 
 ---
@@ -254,255 +249,265 @@ Ai_chatbot/
 
 ### Prerequisites
 
-Make sure you have the following installed:
+Ensure you have the following installed:
+* **Node.js** `v18+` — [Install Node](https://nodejs.org/)
+* **MongoDB** — Standard Atlas tier or local database instance.
+* **Git** — [Install Git](https://git-scm.com/)
+* *(Optional for Offline)* **Ollama** — [Download Ollama](https://ollama.com/)
 
-- **Node.js** `v18+` — [Download](https://nodejs.org/)
-- **MongoDB** — Use [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (free tier)
-- **Git** — [Download](https://git-scm.com/)
-- *(Optional)* **Ollama** — for offline mode — [Download](https://ollama.com/)
+---
 
-### 1. Clone the Repository
+### 1. Clone & Install All
+
+We provide convenient workspace scripts to setup both modules simultaneously:
 
 ```bash
+# Clone the repository
 git clone https://github.com/anuragsinghrajput123456789/Ai-Chatbot.git
 cd Ai-Chatbot
+
+# Install all dependencies (Frontend and Backend) in one command
+npm run install-all
 ```
 
-### 2. Setup the Backend
+---
+
+### 2. Setup the Backend Environment
+
+Navigate to the `backend/` folder and create your `.env` file:
 
 ```bash
 cd backend
-npm install
 ```
 
-Create a `.env` file inside `backend/`:
+Create a `.env` file based on `.env.example`:
 
 ```env
 PORT=5000
-MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/chatbot
-JWT_SECRET=your_super_secret_jwt_key
-GEMINI_API_KEY=your_google_gemini_api_key
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.your-hash.mongodb.net/chatterbot?retryWrites=true&w=majority
+JWT_SECRET=your-random-cryptographic-secret-key-32chars
+GEMINI_API_KEY=AIzaSyYourGoogleStudioGeminiKeyHere
+OPENROUTER_API_KEY=sk-or-v1-yourOpenRouterKeyOptional
 NODE_ENV=development
 ```
 
-Start the backend dev server:
+---
+
+### 3. Setup Local Ollama (For Offline Mode)
+
+If you wish to use local, private AI models, download Ollama and run:
 
 ```bash
-npm run dev        # with nodemon (recommended for development)
-# or
-npm start          # production start
+# Pull your preferred model (e.g. Llama 3)
+ollama pull llama3
+
+# (Optional) Verify model catalog is running locally on port 11434
+curl http://localhost:11434/api/tags
 ```
 
-> The backend will run on `http://localhost:5000`
+---
 
-### 3. Setup the Frontend
+### 4. Run the Concurrent Dev Servers
 
-Open a new terminal:
+Return to the project root directory and start both servers at once:
 
 ```bash
-cd frontend
-npm install
+# Run both front-end and back-end concurrently
 npm run dev
 ```
 
-> The frontend will run on `http://localhost:5173`
+* **Frontend Client**: `http://localhost:5173`
+* **Backend REST API**: `http://localhost:5000`
 
 ---
 
-## 🌐 Online Mode — Google Gemini
+## 🌐 Cloud vs. Local Flow Details
 
-Chatterbot connects to **Google Gemini 1.5** for powerful cloud-based AI responses.
+### 🔐 Authentication & Session Persistence (Online)
 
-**Setup:**
-1. Get a free API key from [Google AI Studio](https://aistudio.google.com/)
-2. Add it to your `backend/.env` as `GEMINI_API_KEY`
-3. Select **Online Mode** in the Navbar toggle
-4. Sign in and start chatting instantly ✅
+All authenticated communications inside Online Mode rely on secure JWT delivery:
 
-**Features in Online Mode:**
-- Persistent chat history saved to MongoDB
-- Full access to all 4 AI personality modes
-- Smart, context-aware multi-turn conversations
-- Responses rendered with full Markdown & syntax highlighting
+```mermaid
+sequenceDiagram
+    actor Client as User Browser
+    participant API as Express Server
+    participant DB as MongoDB Atlas
+
+    %% Registration
+    Note over Client, DB: Registration Process
+    Client->>API: POST /api/auth/register { username, email, password }
+    API->>DB: Check if email exists
+    DB-->>API: Email free
+    API->>API: Hash password (bcryptjs)
+    API->>DB: Save User Document
+    DB-->>API: Saved
+    API-->>Client: HTTP 201 { message, token, user }
+
+    %% Login
+    Note over Client, DB: Login Process
+    Client->>API: POST /api/auth/login { email, password }
+    API->>DB: Find User by Email
+    DB-->>API: User Document
+    API->>API: Compare passwords (bcrypt.compare)
+    API->>API: Sign JWT Token (with user ID)
+    API-->>Client: HTTP 200 { token, user }
+```
 
 ---
 
-## 🔌 Offline Mode — Ollama
+### 🔌 Direct Browser-to-Ollama Local Bypassing (Offline)
 
-Run AI **100% locally** on your machine — no internet required, no data sent anywhere.
+When toggled to **Offline Mode**, the browser completely bypasses the cloud server stack and talks to `localhost:11434` over a direct HTTP connection, keeping your sensitive data private:
 
-**Architecture:**
+```mermaid
+sequenceDiagram
+    actor Client as React App (Browser)
+    participant Ollama as Local Ollama Server (localhost:11434)
 
+    Note over Client, Ollama: Model Discovery
+    Client->>Ollama: GET /api/tags
+    Ollama-->>Client: HTTP 200 { models: [ { name: "llama3" }, { name: "gemma3" } ] }
+
+    Note over Client, Ollama: Chat Inference
+    Client->>Ollama: POST /api/chat { model: "llama3", messages: [...], stream: false }
+    Ollama-->>Client: HTTP 200 { message: { role: "assistant", content: "..." } }
 ```
-React (Vercel) → User's Local Ollama (http://localhost:11434) → Local LLM
-```
-
-The browser communicates **directly** with your local Ollama instance. The Express backend is never involved in offline inference. No ngrok, no developer-hosted Ollama server, no tunneling.
-
-**Setup (each user does this on their own computer):**
-
-```bash
-# 1. Install Ollama
-# Download from https://ollama.com and install
-
-# 2. Pull a model (pick any you prefer)
-ollama pull llama3
-ollama pull gemma3     # alternative
-ollama pull mistral    # alternative
-
-# 3. Start Ollama (runs in the background automatically on most systems)
-ollama serve
-```
-
-4. Select **Offline Mode** in the Navbar toggle
-5. Choose your installed model and start chatting privately ✅
-
-**Features in Offline Mode:**
-- Completely air-gapped — no external API calls, no backend involvement
-- Browser talks directly to `localhost:11434`
-- Supports any Ollama-compatible model (Llama3, Gemma, Mistral, Phi-3, etc.)
-- Ideal for private/sensitive use cases — conversations never leave your machine
-- Works without a MongoDB connection
-- No ngrok required. No developer-hosted Ollama server required.
 
 ---
 
-## 🤖 AI Chat Modes
+## 🤖 AI Chat Personalities
 
-Chatterbot offers **4 specialized AI personas**, each with custom system prompts:
+Each character configuration injects specialized instructions into the LLM system parameters:
 
-| Mode | Icon | Description | Example Prompts |
+| Character | Mode Icon | Primary Instruction Strategy | Prompt Example |
 |---|---|---|---|
-| 🗨️ **Friendly Chat** | 💬 | Your casual AI companion — warm, fun, and helpful for everyday questions | *"Help me write a professional email"* |
-| 👨‍💻 **Code Expert** | `</>` | Senior developer AI — explains code, debugs, and teaches best practices | *"Explain JavaScript promises simply"* |
-| 📚 **Study Buddy** | 📖 | Adaptive tutor — breaks down complex concepts, quizzes you, and reinforces learning | *"Teach me how React hooks work"* |
-| 🎨 **Creative Muse** | ✨ | Your creative partner — brainstorms ideas, writes stories, and sparks imagination | *"Give me 5 creative project ideas"* |
+| **Friendly Chat** | 💬 | Act as a general-purpose, polite, conversational companion. | *"Draft a short welcome message for my community newsletter"* |
+| **Code Expert** | `</>` | Act as an expert senior compiler and systems engineer. Output high-efficiency clean code, formatting markdown accurately. | *"Explain JavaScript event loops and promises in 3 bullet points"* |
+| **Study Buddy** | 📖 | Act as an encouraging educational mentor. Structure information progressively, providing checklists and quizzes. | *"Why does seawater contain salinity?"* |
+| **Creative Muse** | ✨ | Act as an artistic assistant. Generate out-of-the-box storylines, dynamic descriptions, and brand assets. | *"Write a cyberpunk plot hook about an AI learning to dream"* |
 
 ---
 
-## 🔐 API Routes
+## 🔐 API Route Specifications
 
-### Auth Routes — `/api/auth`
+All backend endpoints are prefixed with `/api`.
+
+### Auth Endpoints
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | Register new user (with alphanumeric validation) | ❌ |
-| `POST` | `/api/auth/login` | Login & receive JWT | ❌ |
-| `PATCH` | `/api/auth/profile/avatar` | Update user avatar character identifier | ✅ |
+| `POST` | `/auth/register` | Signs up a new user (with email formats & username validations) | ❌ |
+| `POST` | `/auth/login` | Yields authenticated JWT token matching verified credentials | ❌ |
+| `PATCH` | `/auth/profile/avatar` | Updates user's custom robotic avatar identifier | ✅ |
 
-### Chat Routes — `/api/chat`
+### Chat Endpoints
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `POST` | `/api/chat/` | Send message to AI & retrieve session payload | Optional (Guests support) |
-| `GET` | `/api/chat/` | Fetch list of user chat sessions | ✅ |
-| `GET` | `/api/chat/:chatId` | Retrieve chat message history for specific session | ✅ |
-| `PATCH` | `/api/chat/:chatId/title` | Rename chat session title | ✅ |
-| `DELETE` | `/api/chat/:chatId` | Delete specific chat session history | ✅ |
-| `DELETE` | `/api/chat/` | Delete all chat history sessions | ✅ |
-| `PATCH` | `/api/chat/messages/:messageId` | Update text content of a specific message | ✅ |
-| `DELETE` | `/api/chat/messages/:messageId` | Delete a specific message | ✅ |
-
-> **Note:** Offline mode (Ollama) does not use any backend API routes. The browser communicates directly with the user's local Ollama instance at `http://localhost:11434`.
+| `POST` | `/chat` | Submits prompt to cloud model pipeline & returns thread details | Optional (Guests supported) |
+| `GET` | `/chat` | Fetches all authenticated threads for the user | ✅ |
+| `GET` | `/chat/:chatId` | Retrieves complete messages array within a specified session | ✅ |
+| `PATCH` | `/chat/:chatId/title` | Renames the conversational thread title | ✅ |
+| `DELETE` | `/chat/:chatId` | Deletes a thread from Mongoose | ✅ |
+| `DELETE` | `/chat` | Wipes the user's entire thread history from MongoDB | ✅ |
+| `PATCH` | `/chat/messages/:messageId` | Edits the text content of a specific message | ✅ |
+| `DELETE` | `/chat/messages/:messageId` | Deletes a specific message inside a thread | ✅ |
 
 ---
 
-## 🛡️ Security Features & Production Hardening
+## 🛡️ Production Hardening & Security
 
-Chatterbot is built with **production-grade security** and exceptional resilience:
+Chatterbot implements defenses against common security exploits:
 
+* **⚡ Sequential Server Startup**: The server establishes a connection to MongoDB *before* binding to the network socket, preventing half-boot crashes.
+* **🛡️ Helmet.js Integration**: Configures secure HTTP headers to prevent Clickjacking and basic XSS attacks.
+* **🚫 Express Rate Limiting**: Restricts client requests to a maximum of 500 per 15 minutes per IP address.
+* **🧬 NoSQL injection prevention**: Cleans user input, filtering queries containing Mongo operators (`$` and `.`).
+* **🗝️ Alphanumeric Signup Validation**: Restricts usernames to letters and numbers, preventing injection in database queries.
+* **⏱️ Request Timeout Guards**: Uses a 15-second `AbortSignal` on the backend for Gemini calls and a 5-second `AbortSignal` on the frontend for Ollama calls, keeping the connection pool clean.
+* **🚫 401 Session Interceptor**: Stale tokens trigger immediate logout, clearing local storage.
+
+---
+
+## 🏎️ Performance & Rendering Optimizations
+
+### 1. Hardware-Accelerated Layout Compositing
+Long conversation screens use the `will-change: transform` styling property. This signals the browser to offload layout painting to the GPU, preventing frame drops during high-speed scrolling:
+```css
+.chat-scroll-container {
+  will-change: transform;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
 ```
-✅ Sequential Booting   — Backend awaits MongoDB connection before listening for HTTP traffic, preventing half-boot states
-✅ Connection Resiliency — Database connection timeout set to 5s to fail-fast and allow instant Docker/Render restarts
-✅ Helmet.js Security    — Strict HTTP security headers (anti-clickjacking and XSS defenses)
-✅ Compression           — Gzip compression middleware registered on the Express backend for high-speed content delivery
-✅ Morgan Logger         — Request logging setup for diagnostic ease in development
-✅ Rate Limiting         — Max 500 requests per 15 min per IP to prevent DDoS and API resource drain
-✅ NoSQL Sanitization    — Anti-NoSQL query injection layer checking bodies, params, and request queries
-✅ Input Validations     — Alphanumeric/length username checks, email format validation, and max 10k message character limits
-✅ Chat ID Sanitization  — Hexadecimal 24-character validation on MongoDB ObjectIds to prevent raw CastErrors
-✅ AI Timeout Safety     — 15-second AbortSignals on all backend API fetches (Gemini/OpenRouter) to prevent hanging tasks
-✅ Code-Splitting        — Frontend built with Vite manual Rollup chunks for optimized caching and fast bundle loads
-✅ 401 Session Interceptor — Auto-logout on token expiration (cleans localStorage and redirect-flushes to login)
-✅ Graceful JSON Parsing — Express SyntaxError handling to prevent malformed payload crashes
-✅ Subdocument Safety    — Complete null-checks and safe deletion models for message arrays
+
+### 2. Manual Rollup Vendor Chunking
+Vite isolates large external node dependencies (`react`, `react-markdown`, `react-syntax-highlighter`) into separate modules, optimizing browser loading speed:
+```javascript
+// vite.config.js
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          markdown: ['react-markdown', 'remark-gfm'],
+          highlight: ['react-syntax-highlighter'],
+        }
+      }
+    }
+  }
+});
 ```
 
 ---
 
-## 🌍 Environment Variables
+## 📦 Deployment Pipeline
 
-### Backend (`backend/.env`)
-
-| Variable | Required | Description |
-|---|---|---|
-| `PORT` | ✅ | Server port (default: `5000`) |
-| `MONGO_URI` | ✅ | MongoDB connection string |
-| `JWT_SECRET` | ✅ | Secret key for JWT signing |
-| `GEMINI_API_KEY` | ✅ | Google Gemini AI API key |
-| `NODE_ENV` | ✅ | `development` or `production` |
-
-> **Note:** No `OLLAMA_BASE_URL` is needed. Offline mode runs entirely in the user's browser and communicates directly with the user's local Ollama. The backend is not involved in offline inference.
-
----
-
-## 📦 Deployment
-
-### Frontend — Vercel
-
-```bash
-cd frontend
-npm run build
-# Deploy via Vercel CLI or connect GitHub repo to vercel.com
+### Frontend (Deploying to Vercel)
+Chatterbot includes a pre-configured `vercel.json` to handle client-side SPA routing:
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
 ```
+1. Connect your repository to [Vercel](https://vercel.com).
+2. Set the root directory to `frontend`.
+3. Build command: `npm run build`.
+4. Output directory: `dist`.
 
-A `vercel.json` is included for SPA routing support.
-
-### Backend — Render / Railway
-
-```bash
-# Set environment variables in your hosting dashboard
-# Set start command to:
-node server.js
-```
-
-> **Note:** In production, the backend serves the frontend's `dist/` folder as a static SPA from a single origin.
-
-**Offline Mode** requires no server-side deployment — each user installs Ollama on their own computer. See the [Offline Mode](#-offline-mode--ollama) section for details.
+### Backend (Deploying to Render or Railway)
+1. Add environment variables in your hosting provider's dashboard.
+2. Set the startup script: `node server.js` (pointing to `backend/server.js`).
+3. Set the build step: `npm install` (within `backend`).
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! 🎉
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-```bash
-# 1. Fork the repo
-# 2. Create your feature branch
-git checkout -b feature/amazing-feature
-
-# 3. Commit your changes
-git commit -m "feat: add amazing feature"
-
-# 4. Push to the branch
-git push origin feature/amazing-feature
-
-# 5. Open a Pull Request
-```
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by [Anurag Singh Rajput](https://github.com/anuragsinghrajput123456789)**
+**Crafted with ❤️ by [Anurag Singh Rajput](https://github.com/anuragsinghrajput123456789)**
 
-⭐ **Star this repo** if you found it helpful!
+⭐ **Star this repository** if you found it useful!
 
 [![GitHub stars](https://img.shields.io/github/stars/anuragsinghrajput123456789/Ai-Chatbot?style=social)](https://github.com/anuragsinghrajput123456789/Ai-Chatbot/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/anuragsinghrajput123456789/Ai-Chatbot?style=social)](https://github.com/anuragsinghrajput123456789/Ai-Chatbot/network/members)

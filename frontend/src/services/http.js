@@ -17,17 +17,32 @@ export const readError = async (res, fallback) => {
 };
 
 export const fetchWithTimeout = async (url, options = {}) => {
-  const { timeout = 20000, ...customOptions } = options;
+  const { timeout = 20000, signal, ...customOptions } = options;
 
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeout);
+
+  if (signal) {
+    if (signal.aborted) {
+      clearTimeout(timeoutId);
+      throw signal.reason || new DOMException("The user aborted a request.", "AbortError");
+    }
+    signal.addEventListener("abort", () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    });
+  }
 
   try {
     const res = await fetch(url, {
       ...customOptions,
       signal: controller.signal,
     });
-    clearTimeout(id);
+    clearTimeout(timeoutId);
 
     if (res.status === 401) {
       // Clear all user related local storage items on unauthorized request
@@ -46,9 +61,12 @@ export const fetchWithTimeout = async (url, options = {}) => {
 
     return res;
   } catch (error) {
-    clearTimeout(id);
+    clearTimeout(timeoutId);
     if (error.name === "AbortError") {
-      throw new Error("Request timed out. Please try again.");
+      if (timedOut) {
+        throw new Error("Request timed out. Please try again.");
+      }
+      throw error;
     }
     throw error;
   }

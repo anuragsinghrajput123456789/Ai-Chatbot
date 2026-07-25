@@ -112,7 +112,7 @@ export async function renameChatSession(chatId, title) {
   return res.json();
 }
 
-export async function sendMessageToBackend(message, systemPrompt, mode, modelName, chatId) {
+export async function sendMessageToBackend(message, systemPrompt, mode, modelName, chatId, signal) {
   const body = { message, systemPrompt, mode };
   if (modelName) body.modelName = modelName;
   if (chatId) body.chatId = chatId;
@@ -125,6 +125,7 @@ export async function sendMessageToBackend(message, systemPrompt, mode, modelNam
     },
     body: JSON.stringify(body),
     timeout: 30000, // 30 seconds for AI answers
+    signal,
   });
 
   if (!res.ok) {

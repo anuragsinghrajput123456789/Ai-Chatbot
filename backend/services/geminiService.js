@@ -84,8 +84,8 @@ export const generateGeminiReply = async ({ messages, message, systemPrompt }) =
 
         recentMessages.push({ role: 'user', content: message });
 
-        const primaryModel = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash";
-        const backupModel = "google/gemini-flash-1.5";
+        const primaryModel = process.env.OPENROUTER_MODEL || "google/gemini-2.5-flash";
+        const backupModel = "google/gemini-2.5-flash-lite";
 
         try {
             console.log(`OpenRouter: Sending request to primary model "${primaryModel}"...`);
@@ -93,7 +93,9 @@ export const generateGeminiReply = async ({ messages, message, systemPrompt }) =
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": process.env.FRONTEND_URL || "http://localhost:5173",
+                    "X-OpenRouter-Title": "Chatterbot AI"
                 },
                 body: JSON.stringify({
                     model: primaryModel,
@@ -120,7 +122,9 @@ export const generateGeminiReply = async ({ messages, message, systemPrompt }) =
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": process.env.FRONTEND_URL || "http://localhost:5173",
+                        "X-OpenRouter-Title": "Chatterbot AI"
                     },
                     body: JSON.stringify({
                         model: backupModel,

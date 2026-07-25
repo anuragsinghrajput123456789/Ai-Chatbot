@@ -27,6 +27,18 @@ export const errorHandler = (err, req, res, next) => {
         return res.status(409).json({ error: 'Duplicate value already exists' });
     }
 
+    if (err.name === 'VersionError') {
+        return res.status(409).json({ error: 'Document was modified by another request. Please retry.' });
+    }
+
+    if (err.name === 'ParallelSaveError') {
+        return res.status(409).json({ error: 'Parallel save operation detected on document. Please retry.' });
+    }
+
+    if (err.name === 'MongooseServerSelectionError' || err.message?.includes('buffering timed out')) {
+        return res.status(503).json({ error: 'Database service is temporarily unavailable. Please try again later.' });
+    }
+
     const statusCode = err.statusCode || (res.statusCode && res.statusCode !== 200 ? res.statusCode : 500);
 
     return res.status(statusCode).json({

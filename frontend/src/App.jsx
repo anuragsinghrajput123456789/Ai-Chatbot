@@ -39,6 +39,14 @@ function AppRoutes() {
 
   // Auth State
   const [user, setUser] = useState(null);
+  const [activeAbortController, setActiveAbortController] = useState(null);
+
+  const handleCancelRequest = () => {
+    if (activeAbortController) {
+      activeAbortController.abort();
+      setActiveAbortController(null);
+    }
+  };
 
   const readGuestMessages = () => {
     try {
@@ -211,6 +219,9 @@ function AppRoutes() {
     setMessages(prev => [...prev, createLocalMessage("user", userMsg)]);
     setIsLoading(true);
 
+    const controller = new AbortController();
+    setActiveAbortController(controller);
+
     try {
       let reply;
 
@@ -242,6 +253,7 @@ function AppRoutes() {
         reply = await sendOllamaChatMessage({
           model: selectedOllamaModel,
           messages: ollamaMessages,
+          signal: controller.signal,
         });
 
         // Offline messages are stored only in local React state (never persisted to the server)
@@ -249,7 +261,14 @@ function AppRoutes() {
         setMessages(prev => [...prev, createLocalMessage("model", reply)]);
         return;
       } else {
-        const data = await sendMessageToBackend(userMsg, MODES[activeMode].systemPrompt, 'online', null, currentChatId);
+        const data = await sendMessageToBackend(
+          userMsg,
+          MODES[activeMode].systemPrompt,
+          "online",
+          null,
+          currentChatId,
+          controller.signal
+        );
         reply = data.reply;
 
         if (user) {
@@ -277,9 +296,14 @@ function AppRoutes() {
       setMessages(prev => [...prev, createLocalMessage("model", reply)]);
     } catch (err) {
       setIsTyping(false);
-      setMessages(prev => [...prev, { role: "model", text: err.message || "Error: Could not connect to server." }]);
+      if (err.name === "AbortError") {
+        setMessages(prev => [...prev, createLocalMessage("model", "Generation stopped.")]);
+      } else {
+        setMessages(prev => [...prev, createLocalMessage("model", err.message || "Error: Could not connect to server.")]);
+      }
     } finally {
       setIsLoading(false);
+      setActiveAbortController(null);
     }
   };
 
@@ -348,6 +372,7 @@ function AppRoutes() {
                 input={input}
                 setInput={setInput}
                 onSend={handleSend}
+                onCancel={handleCancelRequest}
                 activeMode={activeMode}
                 setActiveMode={setActiveMode}
                 isDarkMode={isDarkMode}

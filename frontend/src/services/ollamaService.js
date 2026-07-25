@@ -9,6 +9,15 @@
 
 const OLLAMA_BASE_URL = "http://localhost:11434";
 
+const getTimeoutSignal = (ms) => {
+  if (typeof AbortSignal.timeout === "function") {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+};
+
 /**
  * Check whether Ollama is running by requesting GET /api/tags.
  * @returns {{ running: boolean, error: string }}
@@ -16,7 +25,7 @@ const OLLAMA_BASE_URL = "http://localhost:11434";
 export async function fetchOllamaStatus() {
   try {
     const res = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
-      signal: AbortSignal.timeout(5000),
+      signal: getTimeoutSignal(5000),
     });
 
     if (!res.ok) {
@@ -42,7 +51,7 @@ export async function fetchOllamaStatus() {
 export async function fetchOllamaModels() {
   try {
     const res = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
-      signal: AbortSignal.timeout(5000),
+      signal: getTimeoutSignal(5000),
     });
 
     if (!res.ok) {
@@ -62,10 +71,10 @@ export async function fetchOllamaModels() {
  * Uses the /api/chat endpoint with the full conversation history
  * formatted as an array of { role, content } objects.
  *
- * @param {{ model: string, messages: Array<{ role: string, content: string }> }} params
+ * @param {{ model: string, messages: Array<{ role: string, content: string }>, signal: AbortSignal }} params
  * @returns {string} The assistant's reply text.
  */
-export async function sendOllamaChatMessage({ model, messages }) {
+export async function sendOllamaChatMessage({ model, messages, signal }) {
   const res = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,6 +83,7 @@ export async function sendOllamaChatMessage({ model, messages }) {
       messages,
       stream: false,
     }),
+    signal,
   });
 
   if (!res.ok) {
