@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import KittyBot from "./KittyBot";
+import { uploadDocument, fetchChatDocuments, deleteDocument } from "../api";
 import Footer from "./Footer";
 import { MODES } from "../constants";
 import { useChatSettings } from "../context/ChatSettingsContext";
@@ -13,7 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus, coy } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 const MessageItem = React.memo(({
     msg,
@@ -32,7 +33,8 @@ const MessageItem = React.memo(({
     editingMessageId,
     editingText,
     setEditingText,
-    setEditingMessageId
+    setEditingMessageId,
+    isStreaming
 }) => {
     return (
         <motion.div
@@ -43,11 +45,10 @@ const MessageItem = React.memo(({
         >
             {isUser ? (
                 <div className="flex w-full gap-3 justify-end items-start">
-                    {/* Chat bubble element */}
-                    <div className="flex flex-col items-end gap-2 max-w-[80%] sm:max-w-[70%]">
-                        <div className={`rounded-3xl px-5 py-3.5 text-left font-medium transition-all duration-300 border ${
+                    <div className="flex flex-col items-end gap-2 max-w-[85%] sm:max-w-[70%]">
+                        <div className={`rounded-2xl px-4 py-3 text-left font-medium transition-all duration-300 border ${
                             isDarkMode 
-                                ? "bg-slate-900 border-slate-800/80 text-slate-100 shadow-sm" 
+                                ? "bg-slate-900 border-slate-800 text-slate-100 shadow-sm" 
                                 : "bg-slate-100 border-slate-200 text-slate-800 shadow-sm"
                         }`}>
                             <div className="whitespace-pre-wrap text-[15px] leading-relaxed">{text}</div>
@@ -55,18 +56,16 @@ const MessageItem = React.memo(({
                     </div>
                 </div>
             ) : (
-                <div className="flex w-full gap-4.5 justify-start items-start group/message">
-                    {/* Bot Avatar */}
-                    <div className={`flex h-9 w-9 shrink-0 select-none items-center justify-center rounded-full border text-sm transition-all duration-300 ${
+                <div className="flex w-full gap-4 justify-start items-start group/message">
+                    <div className={`flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border text-sm transition-all duration-300 ${
                         isDarkMode
-                            ? "border-slate-850 bg-slate-900 text-purple-400"
-                            : "border-slate-150 bg-white text-purple-655 shadow-sm"
+                            ? "border-slate-800 bg-slate-900 text-purple-400"
+                            : "border-slate-200 bg-white text-purple-600 shadow-sm"
                     }`}>
                         <Bot className="h-4.5 w-4.5 text-purple-400" />
                     </div>
 
-                    {/* Borderless text-centric AI response layout */}
-                    <div className="flex-1 min-w-0 pr-4 text-left">
+                    <div className="flex-1 min-w-0 pr-2 text-left">
                         {editingMessageId === msg._id ? (
                             <div className="flex flex-col gap-2 bg-slate-900/10 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-850/50">
                                 <textarea
@@ -99,10 +98,18 @@ const MessageItem = React.memo(({
                                 </div>
                             </div>
                         ) : (
-                            <div className={`prose prose-base max-w-none break-words leading-relaxed text-[15px] ${isDarkMode ? "prose-invert text-slate-250" : "text-slate-800"}`}>
+                            <div className={`prose prose-base max-w-none break-words leading-relaxed text-[15px] ${isDarkMode ? "prose-invert text-slate-300" : "text-slate-800"}`}>
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm]}
                                     components={{
+                                        h1: ({node: _node, ...props}) => <h1 className="text-xl font-extrabold mt-6 mb-3 text-slate-900 dark:text-white" {...props} />,
+                                        h2: ({node: _node, ...props}) => <h2 className="text-lg font-bold mt-5 mb-2.5 text-slate-900 dark:text-white" {...props} />,
+                                        h3: ({node: _node, ...props}) => <h3 className="text-base font-bold mt-4 mb-2 text-slate-900 dark:text-white" {...props} />,
+                                        p: ({node: _node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+                                        ul: ({node: _node, ...props}) => <ul className="list-disc pl-5 mb-4 space-y-1 text-slate-700 dark:text-slate-300" {...props} />,
+                                        ol: ({node: _node, ...props}) => <ol className="list-decimal pl-5 mb-4 space-y-1 text-slate-700 dark:text-slate-300" {...props} />,
+                                        li: ({node: _node, ...props}) => <li className="mb-1" {...props} />,
+                                        blockquote: ({node: _node, ...props}) => <blockquote className="border-l-4 border-purple-500 pl-4 italic my-4 text-slate-500 dark:text-slate-400 bg-slate-900/5 dark:bg-white/5 py-1 pr-2 rounded-r-lg" {...props} />,
                                         code({ node: _node, className, children, ...props }) {
                                             const match = /language-(\w+)/.exec(className || "");
                                             const isInline = !match && !String(children).includes('\n');
@@ -111,7 +118,7 @@ const MessageItem = React.memo(({
                                                 <div className={`relative group/code my-5 rounded-xl overflow-hidden border ${
                                                     isDarkMode ? 'bg-slate-950/70 border-slate-900/40' : 'bg-slate-100/70 border-slate-200/60'
                                                 }`}>
-                                                    <div className={`flex items-center justify-between px-4 py-2.5 text-xs border-b ${
+                                                    <div className={`flex items-center justify-between px-4 py-2 text-xs border-b ${
                                                         isDarkMode ? "bg-slate-950/80 border-slate-900/40" : "bg-slate-100/80 border-slate-200/60"
                                                     }`}>
                                                         <div className="flex items-center gap-1.5">
@@ -133,8 +140,8 @@ const MessageItem = React.memo(({
                                                         >
                                                             {copiedId === messageId ? (
                                                                 <>
-                                                                    <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />
-                                                                    <span className="text-emerald-400">Copied!</span>
+                                                                    <CheckCheck className="w-3.5 h-3.5 text-emerald-405" />
+                                                                    <span className="text-emerald-405">Copied!</span>
                                                                 </>
                                                             ) : (
                                                                 <>
@@ -160,19 +167,68 @@ const MessageItem = React.memo(({
                                                 </code>
                                             );
                                         },
-                                        table: ({node: _node, ...props}) => <div className="overflow-x-auto my-6"><table className="min-w-full divide-y divide-slate-800 border border-slate-800 rounded-xl" {...props} /></div>,
-                                        th: ({node: _node, ...props}) => <th className="px-5 py-3 bg-slate-900 text-left text-xs font-black uppercase tracking-widest text-slate-400" {...props} />,
-                                        td: ({node: _node, ...props}) => <td className="px-5 py-3 border-t border-slate-800 text-sm font-semibold" {...props} />
+                                        table: ({node: _node, ...props}) => (
+                                            <div className="overflow-x-auto my-6 rounded-xl border border-slate-200 dark:border-slate-800">
+                                                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800" {...props} />
+                                            </div>
+                                        ),
+                                        th: ({node: _node, ...props}) => (
+                                            <th className="px-5 py-3 bg-slate-50 dark:bg-slate-900 text-left text-xs font-black uppercase tracking-widest text-slate-550 dark:text-slate-400" {...props} />
+                                        ),
+                                        td: ({node: _node, ...props}) => (
+                                            <td className="px-5 py-3 text-sm font-medium border-t border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-300" {...props} />
+                                        )
                                     }}
                                 >
                                     {text}
                                 </ReactMarkdown>
+                                {isStreaming && (
+                                    <span className="inline-block w-2.5 h-4.5 ml-1 bg-purple-500 animate-pulse rounded-sm align-middle" />
+                                )}
                             </div>
                         )}
 
-                        {/* Modern inline Micro-action row below plain text */}
+                        {/* RAG citations section */}
+                        {msg.citations && msg.citations.length > 0 && (
+                            <div className="mt-4 border-t border-slate-900/10 dark:border-white/5 pt-3.5 space-y-2">
+                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-505 dark:text-slate-400 flex items-center gap-1.5">
+                                    <Sparkle className="w-3.5 h-3.5 text-purple-405 animate-pulse" />
+                                    Grounded Citations & References
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2">
+                                    {msg.citations.map((cite, index) => {
+                                        const scorePct = (cite.score * 100).toFixed(0);
+                                        return (
+                                            <div 
+                                                key={index}
+                                                className={`p-3 rounded-xl border flex flex-col justify-between gap-1.5 transition-all text-xs ${
+                                                    isDarkMode 
+                                                        ? "border-slate-850 bg-slate-950/60 hover:border-slate-800 text-slate-200" 
+                                                        : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-750"
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between gap-1">
+                                                    <span className="font-extrabold truncate max-w-[150px]">{cite.docName}</span>
+                                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md ${
+                                                        cite.score > 0.5 ? "text-emerald-450 bg-emerald-500/10" : "text-amber-450 bg-amber-500/10"
+                                                    }`}>
+                                                        {scorePct}% Match
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] text-slate-450 dark:text-slate-400 leading-relaxed font-semibold italic line-clamp-3">
+                                                    "{cite.text}"
+                                                </p>
+                                                <div className="text-[8px] text-slate-500 font-bold uppercase tracking-wider">
+                                                    Source Block #{cite.index}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-3.5 mt-4 pl-1 md:opacity-0 md:group-hover/message:opacity-100 focus-within:opacity-100 transition-opacity">
-                            {/* Copy button */}
                             <button
                                 onClick={() => handleCopyText(text, msg._id)}
                                 className={`rounded-lg p-1.5 transition-colors ${
@@ -183,7 +239,6 @@ const MessageItem = React.memo(({
                                 {copiedId === msg._id ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                             </button>
 
-                            {/* Thumbs Up Rating */}
                             <button
                                 onClick={() => handleRateMessage(msg._id, "up")}
                                 className={`rounded-lg p-1.5 transition-colors ${
@@ -196,7 +251,6 @@ const MessageItem = React.memo(({
                                 <ThumbsUp className="h-3.5 w-3.5" />
                             </button>
 
-                            {/* Thumbs Down Rating */}
                             <button
                                 onClick={() => handleRateMessage(msg._id, "down")}
                                 className={`rounded-lg p-1.5 transition-colors ${
@@ -209,7 +263,6 @@ const MessageItem = React.memo(({
                                 <ThumbsDown className="h-3.5 w-3.5" />
                             </button>
 
-                            {/* Delete mock buttons for administrator */}
                             {user && (
                                 <button
                                     onClick={() => onDeleteMessage?.(msg._id)}
@@ -220,7 +273,6 @@ const MessageItem = React.memo(({
                                 </button>
                             )}
 
-                            {/* Edit response button */}
                             {user && (
                                 <button
                                     onClick={() => {
@@ -252,7 +304,8 @@ const MessageItem = React.memo(({
         prevProps.ratings[nextProps.msg._id] === nextProps.ratings[nextProps.msg._id] &&
         prevProps.editingMessageId === nextProps.editingMessageId &&
         prevProps.editingText === nextProps.editingText &&
-        prevProps.user?.avatar === nextProps.user?.avatar
+        prevProps.user?.avatar === nextProps.user?.avatar &&
+        prevProps.isStreaming === nextProps.isStreaming
     );
 });
 
@@ -271,7 +324,8 @@ const ChatInterface = ({
     onUpdateMessage,
     onDeleteMessage,
     isHistoryDrawerOpen,
-    onToggleHistoryDrawer
+    onToggleHistoryDrawer,
+    currentChatId
 }) => {
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
@@ -284,6 +338,69 @@ const ChatInterface = ({
     
     // Feedback rating status mockup
     const [ratings, setRatings] = useState({});
+
+    // Passive scroll management states
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const isUserScrollingUp = useRef(false);
+
+    const handleScroll = () => {
+        const container = chatContainerRef.current;
+        if (!container) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight <= 80;
+
+        isUserScrollingUp.current = !isNearBottom;
+        setShowScrollButton(!isNearBottom);
+    };
+
+    // RAG Document states and references
+    const fileInputRef = useRef(null);
+    const [attachedDocs, setAttachedDocs] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(null);
+
+    const loadDocuments = useCallback(async () => {
+        if (!user) return;
+        try {
+            const data = await fetchChatDocuments(currentChatId);
+            setAttachedDocs(data.documents || []);
+        } catch (err) {
+            console.error("Failed to load documents", err);
+        }
+    }, [currentChatId, user]);
+
+    useEffect(() => {
+        loadDocuments();
+    }, [loadDocuments]);
+
+    const handleUploadFile = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        setIsUploading(true);
+        setUploadProgress("Indexing context...");
+        try {
+            await uploadDocument(file, currentChatId);
+            await loadDocuments();
+        } catch (err) {
+            alert("File processing failed: " + err.message);
+        } finally {
+            setIsUploading(false);
+            setUploadProgress(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const handleDeleteDoc = async (docId) => {
+        if (!window.confirm("Delete this document from this chat? The grounding text will be removed.")) return;
+        try {
+            await deleteDocument(docId);
+            await loadDocuments();
+        } catch (err) {
+            alert("Failed to delete document: " + err.message);
+        }
+    };
 
     const chatSettings = useChatSettings();
     const location = useLocation();
@@ -310,7 +427,8 @@ const ChatInterface = ({
             chatSettings.setProvider("offline");
             setShowOfflineGuide(true);
         }
-    }, [location.state, chatSettings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location.state]);
 
     // Auto grow textarea whenever input content changes (for paragraphs & paste support)
     useEffect(() => {
@@ -349,7 +467,7 @@ const ChatInterface = ({
     const animationFrameIdRef = useRef(null);
 
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-    const isLastMessageAI = lastMessage && lastMessage.role === "assistant";
+    const isLastMessageAI = lastMessage && lastMessage.role === "model";
 
     useEffect(() => {
         if (!lastMessage) {
@@ -396,14 +514,15 @@ const ChatInterface = ({
         const container = chatContainerRef.current;
         if (!container) return;
 
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
-
-        if (force || isNearBottom) {
+        if (force) {
             container.scrollTo({
-                top: scrollHeight,
+                top: container.scrollHeight,
                 behavior: "smooth"
             });
+            isUserScrollingUp.current = false;
+            setShowScrollButton(false);
+        } else if (!isUserScrollingUp.current) {
+            container.scrollTop = container.scrollHeight;
         }
     }, []);
 
@@ -416,17 +535,15 @@ const ChatInterface = ({
         }
     }, [messages, scrollToBottom]);
 
+    // Scroll to bottom during token-by-token streaming only if user is near bottom
     useEffect(() => {
-        let intervalId;
-        if (isLoading) {
-            intervalId = setInterval(() => {
-                scrollToBottom(false);
-            }, 150);
+        if (isLoading && !isUserScrollingUp.current) {
+            const container = chatContainerRef.current;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
         }
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [isLoading, scrollToBottom]);
+    }, [displayedLastMessageText, isLoading]);
 
     const handleCopyText = useCallback(async (text, id) => {
         try {
@@ -473,7 +590,7 @@ const ChatInterface = ({
             }`}>
                 <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3">
                     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 sm:gap-4">
-                        {(!isHistoryDrawerOpen || window.innerWidth < 640) && user && (
+                        {user && (
                             <button
                                 onClick={onToggleHistoryDrawer}
                                 className={`shrink-0 rounded-lg border p-2 transition-all ${
@@ -672,8 +789,29 @@ const ChatInterface = ({
 
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent relative">
                 
+                {/* Scroll to Bottom Floating Action Button */}
+                <AnimatePresence>
+                    {showScrollButton && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            type="button"
+                            onClick={() => scrollToBottom(true)}
+                            className={`absolute bottom-36 right-6 sm:right-8 z-30 p-2 rounded-full border shadow-md transition-all cursor-pointer ${
+                                isDarkMode 
+                                    ? "bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800" 
+                                    : "bg-white border-slate-200 text-slate-600 hover:text-slate-950 hover:bg-slate-50"
+                            }`}
+                            title="Scroll to Bottom"
+                        >
+                            <ChevronDown className="h-4.5 w-4.5 animate-bounce" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+
                 {/* main Conversational Area */}
-                <div ref={chatContainerRef} data-lenis-prevent className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-3 pt-5 pb-8 sm:px-5 sm:pt-6 relative z-10 flex flex-col will-change-transform">
+                <div ref={chatContainerRef} onScroll={handleScroll} data-lenis-prevent className="scrollbar-none min-h-0 flex-1 overflow-y-auto px-3 pt-5 pb-8 sm:px-5 sm:pt-6 relative z-10 flex flex-col will-change-transform">
                     {messages.length === 0 ? (
                         /* Cinematic Empty State Hero Showcase */
                         <div className="flex min-h-full flex-col items-center justify-center pt-8 pb-24 max-w-4xl mx-auto w-full">
@@ -726,7 +864,7 @@ const ChatInterface = ({
                                                         : "border-purple-200 bg-white text-slate-900 shadow-md shadow-purple-500/5"
                                                     : isDarkMode 
                                                         ? "glass-panel-dark text-slate-400 border-slate-900 hover:border-slate-800 hover:text-white" 
-                                                        : "glass-panel text-slate-500 border-slate-200/80 hover:border-slate-300 hover:text-slate-950"
+                                                        : "glass-panel text-slate-500 border-slate-200/80 hover:border-slate-300 hover:text-slate-955"
                                             }`}
                                         >
                                             {isCurrent && (
@@ -779,7 +917,7 @@ const ChatInterface = ({
                                         className={`rounded-2xl border p-4 text-xs font-bold text-left leading-relaxed transition-all shadow-sm ${
                                             isDarkMode 
                                                 ? "border-slate-900 bg-slate-950/50 text-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-800" 
-                                                : "border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                                                : "border-slate-200 bg-white/60 text-slate-600 hover:bg-slate-50 hover:text-slate-955"
                                         }`}
                                     >
                                         {prompt}
@@ -818,6 +956,7 @@ const ChatInterface = ({
                                         editingText={editingText}
                                         setEditingText={setEditingText}
                                         setEditingMessageId={setEditingMessageId}
+                                        isStreaming={isLast && !isUser && isLoading}
                                     />
                                 );
                             })}
@@ -925,100 +1064,166 @@ const ChatInterface = ({
                             )}
                         </AnimatePresence>
 
-                        {/* Redesigned Single-Row Inline Input Pill */}
-                        <div className="mx-auto flex w-full max-w-4xl flex-col gap-2">
-                            <div className={`mx-auto flex w-full max-w-3xl items-center gap-3.5 rounded-full border px-5 py-2 shadow-lg transition-all focus-within:ring-2 focus-within:ring-purple-500/20 ${
-                                isDarkMode 
-                                    ? "border-slate-800/80 bg-slate-950/80 backdrop-blur-xl" 
-                                    : "border-slate-200 bg-white/90 backdrop-blur-xl"
-                            }`}>
-                                {/* Far Left: Plus attachment button */}
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    type="button"
-                                    className={`rounded-full p-2.5 transition-colors hover:bg-slate-800/10 dark:hover:bg-white/10 shrink-0 ${
-                                        isDarkMode ? "text-slate-450 hover:text-white" : "text-slate-500 hover:text-slate-950"
-                                    }`}
-                                    title="Attach logs or files"
-                                >
-                                    <Plus className="h-4.5 w-4.5" />
-                                </motion.button>
+                        {/* Grounded Document Chips */}
+                        {user && (attachedDocs.length > 0 || isUploading) && (
+                            <div className="mx-auto flex flex-wrap w-full max-w-3xl gap-2 px-4 py-3 bg-slate-900/10 dark:bg-black/15 rounded-2xl border border-slate-900/20 dark:border-white/5 mb-2">
+                                <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 w-full flex items-center justify-between">
+                                    <span>Grounded Chat Context:</span>
+                                    {isUploading && (
+                                        <span className="text-[8px] font-black uppercase text-purple-400 animate-pulse">
+                                            {uploadProgress}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {attachedDocs.map((doc) => (
+                                        <div 
+                                            key={doc._id}
+                                            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                                                isDarkMode 
+                                                    ? "bg-slate-955 border-slate-800 text-slate-300" 
+                                                    : "bg-white border-slate-200 text-slate-700"
+                                            }`}
+                                        >
+                                            <Paperclip className="w-3 h-3 text-purple-400" />
+                                            <span className="truncate max-w-[150px]">{doc.name}</span>
+                                            <button
+                                                onClick={() => handleDeleteDoc(doc._id)}
+                                                className="hover:text-red-500 transition-colors ml-1"
+                                                title="Remove grounded context file"
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {isUploading && (
+                                        <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 border border-purple-500/20 text-purple-400 animate-pulse">
+                                            <RefreshCw className="w-3 h-3 animate-spin" />
+                                            <span>Processing file...</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
-                                {/* Middle Auto-growing Textarea */}
-                                <textarea
-                                    ref={textareaRef}
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !e.shiftKey) {
-                                            e.preventDefault();
-                                            if (input.trim() && !isLoading) {
-                                                onSend();
-                                            }
-                                        }
-                                    }}
-                                    placeholder={`Message your AI Core (${MODES[activeMode].label})...`}
-                                    rows={1}
-                                    className={`flex-1 max-h-[160px] resize-none bg-transparent py-2.5 text-[15px] font-medium outline-none placeholder:text-slate-500/80 scrollbar-none ${
-                                        isDarkMode ? "text-white" : "text-slate-800"
-                                    }`}
-                                    style={{ minHeight: '40px' }}
+                        {/* Redesigned Multi-Row Inline Input Pill */}
+                        <div className="mx-auto flex w-full max-w-4xl flex-col gap-2">
+                            <div className={`mx-auto flex w-full max-w-3xl flex-col rounded-2xl border p-2.5 pb-2 shadow-lg transition-all focus-within:ring-2 focus-within:ring-purple-500/20 ${
+                                isDarkMode 
+                                    ? "border-slate-800/80 bg-slate-955/85 backdrop-blur-xl shadow-black/40" 
+                                    : "border-slate-200 bg-white/90 backdrop-blur-xl shadow-slate-100"
+                            }`}>
+                                {/* Hidden file input for uploads */}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleUploadFile}
+                                    accept=".pdf,.docx,.txt,.md,.csv,.js,.ts,.jsx,.tsx,.py,.go,.html,.css,.json"
+                                    className="hidden"
                                 />
 
-                                {/* Right: Voice dictate & Circular Send trigger */}
-                                <div className="flex items-center gap-2 shrink-0">
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        type="button"
-                                        className={`rounded-full p-2.5 transition-colors hover:bg-slate-800/10 dark:hover:bg-white/10 ${
-                                            isDarkMode ? "text-slate-455 hover:text-white" : "text-slate-500 hover:text-slate-955"
+                                {/* Textarea Zone */}
+                                <div className="w-full px-2">
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" && !e.shiftKey) {
+                                                e.preventDefault();
+                                                if (input.trim() && !isLoading) {
+                                                    onSend();
+                                                }
+                                            }
+                                        }}
+                                        placeholder={`Message your AI Core (${MODES[activeMode].label})...`}
+                                        rows={1}
+                                        className={`w-full min-h-[44px] max-h-[160px] resize-none bg-transparent py-2.5 text-[15px] font-medium outline-none placeholder:text-slate-500/80 scrollbar-none ${
+                                            isDarkMode ? "text-white" : "text-slate-800"
                                         }`}
-                                        title="Voice dictation"
-                                    >
-                                        <Mic className="h-4.5 w-4.5" />
-                                    </motion.button>
+                                        style={{ height: 'auto' }}
+                                    />
+                                </div>
 
-                                    {isLoading ? (
+                                {/* Actions Bar */}
+                                <div className="flex items-center justify-between border-t border-slate-900/5 dark:border-white/5 pt-2 mt-1 px-1">
+                                    {/* Left Actions: Attach, Voice dictation, indicators */}
+                                    <div className="flex items-center gap-1.5">
                                         <motion.button
                                             whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             type="button"
-                                            onClick={onCancel}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 border ${
-                                                isDarkMode 
-                                                    ? "bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.2)]" 
-                                                    : "bg-red-50 border-red-200 text-red-650 hover:bg-red-100 shadow-sm"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className={`rounded-full p-2 transition-colors hover:bg-slate-800/10 dark:hover:bg-white/10 shrink-0 ${
+                                                isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-505 hover:text-slate-950"
                                             }`}
-                                            title="Stop Generation"
+                                            title="Attach documents for RAG grounding"
                                         >
-                                            <span className={`w-2.5 h-2.5 rounded-[2px] ${isDarkMode ? "bg-red-450" : "bg-red-600"}`} />
+                                            <Paperclip className="h-4 w-4" />
                                         </motion.button>
-                                    ) : (
+
                                         <motion.button
-                                            type="button"
+                                            whileHover={{ scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
-                                            onClick={onSend}
-                                            disabled={!input.trim()}
-                                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 ${
-                                                input.trim()
-                                                    ? `text-white shadow-md bg-gradient-to-r ${MODES[activeMode].color} hover:scale-105`
-                                                    : isDarkMode 
-                                                        ? "bg-slate-800/60 text-slate-500 border border-slate-800" 
-                                                        : "bg-slate-100 text-slate-400 border border-slate-200"
+                                            type="button"
+                                            className={`rounded-full p-2 transition-colors hover:bg-slate-800/10 dark:hover:bg-white/10 shrink-0 ${
+                                                isDarkMode ? "text-slate-400 hover:text-white" : "text-slate-505 hover:text-slate-955"
                                             }`}
-                                            title="Dispatch Query"
+                                            title="Voice dictation"
                                         >
-                                            <Send className="h-3.5 w-3.5" />
+                                            <Mic className="h-4 w-4" />
                                         </motion.button>
-                                    )}
+
+                                        {/* Model Badge */}
+                                        <span className={`hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${
+                                            isDarkMode ? "bg-slate-900 text-slate-400" : "bg-slate-100 text-slate-500"
+                                        }`}>
+                                            {chatSettings.provider === "offline" ? "Ollama Node" : "Gemini Core"}
+                                        </span>
+                                    </div>
+
+                                    {/* Right Actions: Stop or Send */}
+                                    <div className="flex items-center gap-2">
+                                        {isLoading ? (
+                                            <motion.button
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                type="button"
+                                                onClick={onCancel}
+                                                className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-300 border ${
+                                                    isDarkMode 
+                                                        ? "bg-red-500/20 border-red-500/30 text-red-400 hover:bg-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.2)]" 
+                                                        : "bg-red-50 border-red-200 text-red-650 hover:bg-red-100 shadow-sm"
+                                                }`}
+                                                title="Stop Generation"
+                                            >
+                                                <span className="w-2.5 h-2.5 rounded-[2px] bg-red-500" />
+                                            </motion.button>
+                                        ) : (
+                                            <motion.button
+                                                type="button"
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={onSend}
+                                                disabled={!input.trim()}
+                                                className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-300 ${
+                                                    input.trim()
+                                                        ? `text-white shadow-md bg-gradient-to-r ${MODES[activeMode].color} hover:scale-105`
+                                                        : isDarkMode 
+                                                            ? "bg-slate-800/60 text-slate-500 border border-slate-800" 
+                                                            : "bg-slate-100 text-slate-400 border border-slate-200"
+                                                }`}
+                                                title="Dispatch Query"
+                                            >
+                                                <Send className="h-3.5 w-3.5" />
+                                            </motion.button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Small Disclaimer text underneath the pill */}
                             <p className={`text-[10px] text-center font-bold tracking-wide mt-1 opacity-60 ${
-                                isDarkMode ? "text-slate-500" : "text-slate-455"
+                                isDarkMode ? "text-slate-500" : "text-slate-450"
                             }`}>
                                 Chatterbot can make mistakes. Consider checking important information.
                             </p>
@@ -1169,11 +1374,16 @@ const ChatModePanel = ({ isDarkMode, settings }) => {
 
             {/* Error notifications */}
             {provider === "offline" && (ollamaError || !ollamaStatus.running || ollamaModels.length === 0) && (
-                <div className={`mt-4 rounded-xl border p-3 text-xs font-semibold flex items-center gap-2 max-w-7xl mx-auto ${
+                <div className={`mt-4 rounded-xl border p-3 text-xs font-semibold flex items-center justify-between gap-2 max-w-7xl mx-auto ${
                     isDarkMode ? "border-red-500/20 bg-red-500/5 text-red-300" : "border-red-200 bg-red-50 text-red-700"
                 }`}>
-                    <X className="w-4 h-4 shrink-0" />
-                    <span>{ollamaError || "Ensure local Ollama process is booted and model tags are pulled."}</span>
+                    <div className="flex items-center gap-2">
+                        <X className="w-4 h-4 shrink-0" />
+                        <span>{ollamaError || "Ensure local Ollama process is booted and model tags are pulled."}</span>
+                    </div>
+                    <Link to="/offline" className="underline hover:text-purple-300 font-bold shrink-0 ml-4">
+                        Configure local models
+                    </Link>
                 </div>
             )}
         </div>

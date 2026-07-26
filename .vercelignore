@@ -1,0 +1,13 @@
+# Exclude backend and node dependencies from Vercel static deployments
+node_modules
+backend
+docs
+screenshots
+Dockerfile
+docker-compose.yml
+render.yaml
+*.md
+.git
+.vscode
+.idea
+.DS_Store

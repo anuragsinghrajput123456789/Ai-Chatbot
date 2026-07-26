@@ -1,6 +1,8 @@
 import 'dotenv/config'; // MUST be first: loads env vars before any module reads process.env
-import mongoose from 'mongoose';
+import { validateEnv } from './config/env.js';
+validateEnv(); // Validate mandatory config before initializing services
 
+import mongoose from 'mongoose';
 import app from './app.js';
 import { connectDB } from './config/db.js';
 

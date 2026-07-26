@@ -1,19 +1,21 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { fetchOllamaModels, fetchOllamaStatus } from "../services/ollamaService";
+import { OfflineModelManager } from "../services/OfflineModelManager";
 
 const ChatSettingsContext = createContext(null);
 
 const MODE_STORAGE_KEY = "chatProviderMode";
-const MODEL_STORAGE_KEY = "ollamaModel";
 
 export const ChatSettingsProvider = ({ children }) => {
   const [provider, setProviderState] = useState(() => localStorage.getItem(MODE_STORAGE_KEY) || "online");
-  const [ollamaModel, setOllamaModelState] = useState(() => localStorage.getItem(MODEL_STORAGE_KEY) || "");
+  const [ollamaModel, setOllamaModelState] = useState(() => OfflineModelManager.getSelectedModel());
   const [customOllamaModel, setCustomOllamaModel] = useState("");
   const [ollamaModels, setOllamaModels] = useState([]);
   const [ollamaStatus, setOllamaStatus] = useState({ running: false, error: "" });
   const [isOllamaLoading, setIsOllamaLoading] = useState(false);
   const [ollamaError, setOllamaError] = useState("");
+
+  // Online model setting
+  const [onlineModel, setOnlineModelState] = useState(() => localStorage.getItem("onlineModel") || "gemini-2.5-flash");
 
   const selectedOllamaModel = customOllamaModel.trim() || ollamaModel;
 
@@ -24,7 +26,12 @@ export const ChatSettingsProvider = ({ children }) => {
 
   const setOllamaModel = useCallback((model) => {
     setOllamaModelState(model);
-    localStorage.setItem(MODEL_STORAGE_KEY, model);
+    OfflineModelManager.setSelectedModel(model);
+  }, []);
+
+  const setOnlineModel = useCallback((model) => {
+    setOnlineModelState(model);
+    localStorage.setItem("onlineModel", model);
   }, []);
 
   const selectedOllamaModelRef = React.useRef(selectedOllamaModel);
@@ -35,7 +42,7 @@ export const ChatSettingsProvider = ({ children }) => {
     setOllamaError("");
 
     try {
-      const status = await fetchOllamaStatus();
+      const status = await OfflineModelManager.checkServiceStatus();
       setOllamaStatus(status);
 
       if (!status.running) {
@@ -44,12 +51,16 @@ export const ChatSettingsProvider = ({ children }) => {
         return;
       }
 
-      const models = await fetchOllamaModels();
+      const models = await OfflineModelManager.listModels();
       setOllamaModels(models);
 
-      if (models.length > 0 && !selectedOllamaModelRef.current) {
-        setOllamaModelState(models[0].name);
-        localStorage.setItem(MODEL_STORAGE_KEY, models[0].name);
+      const savedModel = OfflineModelManager.getSelectedModel();
+      if (savedModel) {
+        setOllamaModelState(savedModel);
+      } else if (models.length > 0) {
+        const defaultModel = models[0].name;
+        setOllamaModelState(defaultModel);
+        OfflineModelManager.setSelectedModel(defaultModel);
       }
 
       if (models.length === 0) {
@@ -62,7 +73,7 @@ export const ChatSettingsProvider = ({ children }) => {
     } finally {
       setIsOllamaLoading(false);
     }
-  }, [selectedOllamaModelRef]);
+  }, []);
 
   useEffect(() => {
     if (provider === "offline") {
@@ -83,6 +94,8 @@ export const ChatSettingsProvider = ({ children }) => {
     isOllamaLoading,
     ollamaError,
     refreshOllama,
+    onlineModel,
+    setOnlineModel,
   }), [
     provider,
     setProvider,
@@ -95,6 +108,8 @@ export const ChatSettingsProvider = ({ children }) => {
     isOllamaLoading,
     ollamaError,
     refreshOllama,
+    onlineModel,
+    setOnlineModel,
   ]);
 
   return (

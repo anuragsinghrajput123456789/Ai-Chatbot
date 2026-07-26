@@ -34,7 +34,7 @@ export const fetchWithTimeout = async (url, options = {}) => {
     signal.addEventListener("abort", () => {
       clearTimeout(timeoutId);
       controller.abort();
-    });
+    }, { once: true });
   }
 
   try {

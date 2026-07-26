@@ -103,6 +103,10 @@
 * **📝 High-Fidelity Markdown Rendering**: Fully parsed markdown outputs with copyable syntax-highlighted code blocks.
 * **🛡️ Hardened Security**: Anti-clickjacking headers, Express rate limits, mongo query sanitizers, password bcrypt-salting, and token-expiry session handlers.
 * **⚡ 60FPS Scroll Acceleration**: Hardware-composited containers (`will-change: transform`) ensure lag-free scrolling during large conversation outputs.
+* **🩺 Liveness & Readiness Probes**: Dedicated `/health/live` and `/health/ready` check points for continuous health monitoring and zero-downtime rollouts.
+* **🐳 Container Orchestration**: Multi-stage `Dockerfile` and `docker-compose.yml` configured for quick self-hosted local or containerized cloud boots.
+* **📝 High-Fidelity Markdown & Code**: Cleaned up layouts for headers, dynamic tables, blockquotes, list items, and syntax-highlighted code with an active blinking AI typing cursor.
+* **🎨 Premium Actions Deck**: Reconfigured input text area into a rounded-2xl glass actions card that keeps tool buttons clustered at the bottom, mimicking ChatGPT/Claude.
 
 ---
 
@@ -426,6 +430,9 @@ Chatterbot implements defenses against common security exploits:
 * **🗝️ Alphanumeric Signup Validation**: Restricts usernames to letters and numbers, preventing injection in database queries.
 * **⏱️ Request Timeout Guards**: Uses a 15-second `AbortSignal` on the backend for Gemini calls and a 5-second `AbortSignal` on the frontend for Ollama calls, keeping the connection pool clean.
 * **🚫 401 Session Interceptor**: Stale tokens trigger immediate logout, clearing local storage.
+* **🔐 Strict Environment Validator**: Synchronously validates mandatory configurations (`JWT_SECRET`, `MONGO_URI`) on server boot, terminating with exit code 1 if missing to avoid runtime failures.
+* **🛡️ Custom CSP Rules**: Customized Content Security Policy in Helmet allows client fetches to local Ollama nodes (`localhost:11434` / `127.0.0.1:11434`) while securing external resources.
+* **📈 Request Tracing & Observability**: Backend logging middleware injects unique tracing ids (`x-request-id`) and outputs execution latency in milliseconds to stdout.
 
 ---
 
@@ -482,6 +489,14 @@ Chatterbot includes a pre-configured `vercel.json` to handle client-side SPA rou
 1. Add environment variables in your hosting provider's dashboard.
 2. Set the startup script: `node server.js` (pointing to `backend/server.js`).
 3. Set the build step: `npm install` (within `backend`).
+
+### Docker Deployment (Self-Hosted Orchestration)
+You can run the entire database and application stack locally using Docker:
+```bash
+# Build and boot the entire stack (App + MongoDB)
+docker-compose up --build -d
+```
+The unified monolith application will be available at `http://localhost:5000`.
 
 ---
 

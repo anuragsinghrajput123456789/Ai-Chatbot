@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ChatInterface from "./components/ChatInterface";
 import Layout from "./components/Layout";
 import { ChatSettingsProvider, useChatSettings } from "./context/ChatSettingsContext";
 import { MODES } from "./constants";
 import LandingPage from "./components/LandingPage";
 import AuthPage from "./pages/AuthPage";
+import OfflineSetup from "./pages/OfflineSetup";
 import ErrorBoundary from "./components/ErrorBoundary";
 import SmoothScroll from "./components/SmoothScroll";
 import { 
   deleteSavedChatMessage, fetchChatList, fetchChatSession, deleteChatHistory, 
-  sendMessageToBackend, updateSavedChatMessage, deleteChatSession, renameChatSession, updateUserAvatar 
+  sendMessageToBackend, updateSavedChatMessage, deleteChatSession, renameChatSession, 
+  updateUserAvatar, retrieveOfflineCitations 
 } from "./api";
-import { sendOllamaChatMessage } from "./services/ollamaService";
+import { sendOllamaChatMessage, sendOllamaChatMessageStream } from "./services/ollamaService";
+import { streamChatCompletion } from "./services/StreamingService";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 export default function App() {
@@ -32,6 +35,7 @@ function AppRoutes() {
   const [messages, setMessages] = useState([]);
   const [chatList, setChatList] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -66,16 +70,46 @@ function AppRoutes() {
     timestamp: new Date().toISOString(),
   });
 
-  const loadChatList = async () => {
+  const sanitizeErrorMessage = (msg) => {
+    if (!msg) return "Something went wrong. Please try again.";
+    const lower = msg.toLowerCase();
+    
+    if (provider === "offline") {
+      if (lower.includes("econnrefused") || lower.includes("failed to fetch") || lower.includes("networkerror") || lower.includes("cannot connect")) {
+        return "Cannot connect to the local Ollama server at http://localhost:11434. Please ensure Ollama is installed and running.";
+      }
+      if (lower.includes("not found") || lower.includes("pull")) {
+        return `The selected model "${selectedOllamaModel || "model_name"}" is not installed locally. Please open your terminal and run: ollama pull ${selectedOllamaModel || "llama3"}`;
+      }
+      if (lower.includes("timed out") || lower.includes("timeout")) {
+        return "Local inference timed out. Your model might still be loading, or your prompt is too large.";
+      }
+      return msg;
+    }
+
+    if (lower.includes("econnrefused") || lower.includes("failed to fetch") || lower.includes("networkerror"))
+      return "Unable to connect to the server. Please check your network or server status.";
+    if (lower.includes("timed out") || lower.includes("timeout"))
+      return "The request took too long. Please try again.";
+    if (lower.includes("429") || lower.includes("too many requests"))
+      return "Too many requests. Please wait a moment and try again.";
+    if (lower.includes("503") || lower.includes("unavailable"))
+      return "The AI service is temporarily unavailable. Please try again shortly.";
+    if (lower.includes("401") || lower.includes("unauthorized") || lower.includes("expired"))
+      return "Your session has expired. Please log in again.";
+    return msg;
+  };
+
+  const loadChatList = useCallback(async () => {
     try {
       const history = await fetchChatList();
       setChatList(history);
     } catch (err) {
       console.error("Failed to load chat list", err);
     }
-  };
+  }, []);
 
-  const handleSelectChat = async (chatId) => {
+  const handleSelectChat = useCallback(async (chatId) => {
     setCurrentChatId(chatId);
     try {
       const sessionMessages = await fetchChatSession(chatId);
@@ -83,7 +117,7 @@ function AppRoutes() {
     } catch (err) {
       console.error("Failed to load chat session", err);
     }
-  };
+  }, []);
 
   const handleNewChat = () => {
     setCurrentChatId(null);
@@ -125,10 +159,18 @@ function AppRoutes() {
     setIsAuthReady(true);
   }, []);
 
+  // C3 fix: Debounced localStorage write for guest messages
+  const guestSaveTimerRef = useRef(null);
   useEffect(() => {
     if (isAuthReady && !user && !currentChatId) {
-      localStorage.setItem(GUEST_CHAT_KEY, JSON.stringify(messages));
+      if (guestSaveTimerRef.current) clearTimeout(guestSaveTimerRef.current);
+      guestSaveTimerRef.current = setTimeout(() => {
+        localStorage.setItem(GUEST_CHAT_KEY, JSON.stringify(messages));
+      }, 500);
     }
+    return () => {
+      if (guestSaveTimerRef.current) clearTimeout(guestSaveTimerRef.current);
+    };
   }, [messages, user, isAuthReady, currentChatId]);
 
   const toggleDarkMode = () => {
@@ -216,91 +258,102 @@ function AppRoutes() {
     setInput("");
     setIsTyping(true);
 
-    setMessages(prev => [...prev, createLocalMessage("user", userMsg)]);
+    const newUserMsg = createLocalMessage("user", userMsg);
+    setMessages(prev => [...prev, newUserMsg]);
     setIsLoading(true);
 
     const controller = new AbortController();
     setActiveAbortController(controller);
 
+    const modelMsgId = `stream-${Date.now()}`;
+    let accumulatedReply = "";
+
     try {
-      let reply;
+      let finalSystemPrompt = MODES[activeMode].systemPrompt;
+      let offlineCitations = [];
 
       if (provider === "offline") {
         if (!ollamaStatus.running) throw new Error("Please start Ollama on your computer to use offline mode.");
         if (!selectedOllamaModel) throw new Error("Choose or enter an Ollama model before sending.");
-        
-        // Build Ollama chat messages array (system prompt + conversation history + new user message)
-        const ollamaMessages = [];
 
-        // Add system prompt for the active AI mode
-        const systemPrompt = MODES[activeMode].systemPrompt;
-        if (systemPrompt) {
-          ollamaMessages.push({ role: "system", content: systemPrompt });
+        try {
+          const retData = await retrieveOfflineCitations(currentChatId, userMsg);
+          offlineCitations = retData.citations || [];
+          if (offlineCitations.length > 0) {
+            const contextText = offlineCitations.map((c, i) => `[Source ${i+1}: ${c.docName} (Confidence: ${(c.score * 100).toFixed(0)}%)]\n${c.text}`).join('\n\n');
+            finalSystemPrompt = `${finalSystemPrompt}\n\n[Grounded Document Context]\nYou have access to the following documents for answering the user's question. Ground your answer strictly in this context. Use inline citations like [Source 1], [Source 2], etc. where applicable. If the context does not contain the answer, rely on your general knowledge but explicitly state that the documents were insufficient.\n\n${contextText}`.trim();
+          }
+        } catch (err) {
+          console.warn("Local RAG context fetch skipped/failed", err);
         }
+      }
 
-        // Add conversation history
-        for (const msg of messages) {
-          ollamaMessages.push({
-            role: msg.role === "user" ? "user" : "assistant",
-            content: msg.text,
-          });
-        }
+      // Add empty response block to be filled during stream
+      setMessages(prev => [...prev, {
+        _id: modelMsgId,
+        role: "model",
+        text: "",
+        citations: offlineCitations.length > 0 ? offlineCitations : undefined,
+        timestamp: new Date().toISOString()
+      }]);
 
-        // Add current user message
-        ollamaMessages.push({ role: "user", content: userMsg });
-
-        // Call the user's local Ollama directly — never goes to the backend
-        reply = await sendOllamaChatMessage({
-          model: selectedOllamaModel,
-          messages: ollamaMessages,
-          signal: controller.signal,
-        });
-
-        // Offline messages are stored only in local React state (never persisted to the server)
-        setIsTyping(false);
-        setMessages(prev => [...prev, createLocalMessage("model", reply)]);
-        return;
-      } else {
-        const data = await sendMessageToBackend(
-          userMsg,
-          MODES[activeMode].systemPrompt,
-          "online",
-          null,
-          currentChatId,
-          controller.signal
-        );
-        reply = data.reply;
-
-        if (user) {
-          if (data.onlineUseCount !== undefined) {
+      await streamChatCompletion({
+        provider,
+        model: provider === "offline" ? selectedOllamaModel : onlineModel,
+        messages: [...messages, newUserMsg],
+        systemPrompt: finalSystemPrompt,
+        chatId: currentChatId,
+        workspaceId: activeWorkspaceId !== "all" && activeWorkspaceId !== "unassigned" ? activeWorkspaceId : null,
+        signal: controller.signal,
+        token: user?.token,
+        onChunk: (chunk) => {
+          accumulatedReply += chunk;
+          setIsTyping(false);
+          setMessages(prev => prev.map(msg => 
+            msg._id === modelMsgId ? { ...msg, text: accumulatedReply } : msg
+          ));
+        },
+        onMetadata: (metadata) => {
+          if (metadata.chatId) {
+            setCurrentChatId(metadata.chatId);
+            loadChatList(); // Refresh list to get new title
+          }
+          if (metadata.onlineUseCount !== undefined) {
             setUser(prev => {
               if (!prev) return prev;
-              const nextUser = { ...prev, onlineUseCount: data.onlineUseCount };
-              localStorage.setItem("onlineUseCount", data.onlineUseCount.toString());
+              const nextUser = { ...prev, onlineUseCount: metadata.onlineUseCount };
+              localStorage.setItem("onlineUseCount", metadata.onlineUseCount.toString());
               return nextUser;
             });
           }
-          if (!currentChatId && data.chatId) {
-            setCurrentChatId(data.chatId);
-            loadChatList(); // Refresh list to get new title
+          if (metadata.messages) {
+            setMessages(metadata.messages);
           }
-          if (data.messages) {
-            setIsTyping(false);
-            setMessages(data.messages);
-            return;
+          if (metadata.citations) {
+            setMessages(prev => prev.map(msg => 
+              msg._id === modelMsgId ? { ...msg, citations: metadata.citations } : msg
+            ));
           }
         }
-      }
+      });
 
       setIsTyping(false);
-      setMessages(prev => [...prev, createLocalMessage("model", reply)]);
     } catch (err) {
       setIsTyping(false);
-      if (err.name === "AbortError") {
-        setMessages(prev => [...prev, createLocalMessage("model", "Generation stopped.")]);
-      } else {
-        setMessages(prev => [...prev, createLocalMessage("model", err.message || "Error: Could not connect to server.")]);
-      }
+      const friendlyMsg = err.name === "AbortError" 
+        ? "Generation stopped."
+        : sanitizeErrorMessage(err.message);
+      
+      setMessages(prev => prev.map(msg => 
+        msg._id === modelMsgId 
+          ? { 
+              ...msg, 
+              text: accumulatedReply 
+                ? (err.name === "AbortError" ? accumulatedReply : `${accumulatedReply}\n\n⚠️ ${friendlyMsg}`) 
+                : `⚠️ ${friendlyMsg}` 
+            } 
+          : msg
+      ));
     } finally {
       setIsLoading(false);
       setActiveAbortController(null);
@@ -364,6 +417,9 @@ function AppRoutes() {
               onNewChat={handleNewChat}
               onDeleteChatSession={handleDeleteChatSession}
               onRenameChatSession={handleRenameChatSession}
+              activeWorkspaceId={activeWorkspaceId}
+              setActiveWorkspaceId={setActiveWorkspaceId}
+              onRefreshChatList={loadChatList}
             >
               <ChatInterface
                 messages={messages}
@@ -379,6 +435,46 @@ function AppRoutes() {
                 user={user}
                 onUpdateMessage={handleUpdateMessage}
                 onDeleteMessage={handleDeleteMessage}
+                currentChatId={currentChatId}
+              />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/offline"
+          element={
+            <Layout
+              isDarkMode={isDarkMode}
+              toggleDarkMode={toggleDarkMode}
+              activeMode={activeMode}
+              user={user}
+              onLogout={handleLogout}
+              onClearChat={handleClearChat}
+              onChangeAvatar={handleChangeAvatar}
+              chatList={chatList}
+              currentChatId={currentChatId}
+              onSelectChat={handleSelectChat}
+              onNewChat={handleNewChat}
+              onDeleteChatSession={handleDeleteChatSession}
+              onRenameChatSession={handleRenameChatSession}
+              activeWorkspaceId={activeWorkspaceId}
+              setActiveWorkspaceId={setActiveWorkspaceId}
+              onRefreshChatList={loadChatList}
+            >
+              <OfflineSetup
+                isDarkMode={isDarkMode}
+                toggleDarkMode={toggleDarkMode}
+                user={user}
+                onLogout={handleLogout}
+                chatList={chatList}
+                currentChatId={currentChatId}
+                onSelectChat={handleSelectChat}
+                onNewChat={handleNewChat}
+                onDeleteChatSession={handleDeleteChatSession}
+                onRenameChatSession={handleRenameChatSession}
+                onChangeAvatar={handleChangeAvatar}
+                handleClearChat={handleClearChat}
               />
             </Layout>
           }

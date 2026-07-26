@@ -1,6 +1,11 @@
 import express from 'express';
 
-import { deleteChatHistory, deleteChatMessage, getChatHistory, sendMessage, updateChatMessage, getChatList, renameChat } from '../controllers/chatController.js';
+import { 
+    deleteChatHistory, deleteChatMessage, getChatHistory, sendMessage, 
+    updateChatMessage, getChatList, renameChat, searchChats,
+    moveChatToWorkspace, duplicateChat, toggleFavoriteChat, toggleArchiveChat,
+    exportChats, importChats
+} from '../controllers/chatController.js';
 import { optionalAuth, protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -9,8 +14,17 @@ const router = express.Router();
 router.patch('/messages/:messageId', protect, updateChatMessage);
 router.delete('/messages/:messageId', protect, deleteChatMessage);
 
+router.get('/search', protect, searchChats);
+router.get('/export', protect, exportChats);
+router.post('/import', protect, importChats);
 router.get('/', protect, getChatList);
 router.post('/', optionalAuth, sendMessage);
+
+router.patch('/:chatId/workspace', protect, moveChatToWorkspace);
+router.post('/:chatId/duplicate', protect, duplicateChat);
+router.patch('/:chatId/favorite', protect, toggleFavoriteChat);
+router.patch('/:chatId/archive', protect, toggleArchiveChat);
+
 router.get('/:chatId', protect, getChatHistory);
 router.patch('/:chatId/title', protect, renameChat);
 router.delete('/:chatId', protect, deleteChatHistory);

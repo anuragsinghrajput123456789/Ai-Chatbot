@@ -158,3 +158,177 @@ export async function deleteSavedChatMessage(messageId) {
   if (!res.ok) throw new Error(await readError(res, "Failed to delete message"));
   return res.json();
 }
+
+export async function searchConversations(query, page = 1, limit = 5, startDate = null, endDate = null, workspaceId = null) {
+  const token = getToken();
+  if (!token) return { results: [], pagination: { total: 0, page: 1, limit, pages: 0 } };
+  
+  const params = new URLSearchParams({
+    q: query,
+    page: page.toString(),
+    limit: limit.toString()
+  });
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+  if (workspaceId) params.append("workspaceId", workspaceId);
+
+  const res = await apiCall(`${API_URL}/chat/search?${params.toString()}`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Search failed"));
+  return res.json();
+}
+
+export async function fetchWorkspaces() {
+  const res = await apiCall(`${API_URL}/workspaces`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to fetch workspaces"));
+  return res.json();
+}
+
+export async function createWorkspace(data) {
+  const res = await apiCall(`${API_URL}/workspaces`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to create workspace"));
+  return res.json();
+}
+
+export async function deleteWorkspace(workspaceId) {
+  const res = await apiCall(`${API_URL}/workspaces/${workspaceId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to delete workspace"));
+  return res.json();
+}
+
+export async function moveChatToWorkspace(chatId, workspaceId) {
+  const res = await apiCall(`${API_URL}/chat/${chatId}/workspace`, {
+    method: "PATCH",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ workspaceId }),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to move chat"));
+  return res.json();
+}
+
+export async function duplicateChat(chatId) {
+  const res = await apiCall(`${API_URL}/chat/${chatId}/duplicate`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to duplicate chat"));
+  return res.json();
+}
+
+export async function toggleFavoriteChat(chatId) {
+  const res = await apiCall(`${API_URL}/chat/${chatId}/favorite`, {
+    method: "PATCH",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to toggle favorite"));
+  return res.json();
+}
+
+export async function toggleArchiveChat(chatId) {
+  const res = await apiCall(`${API_URL}/chat/${chatId}/archive`, {
+    method: "PATCH",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to toggle archive"));
+  return res.json();
+}
+
+export async function uploadDocument(file, chatId) {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (chatId) {
+    formData.append("chatId", chatId);
+  }
+
+  const res = await apiCall(`${API_URL}/documents/upload`, {
+    method: "POST",
+    headers: {
+      ...authHeaders()
+    },
+    body: formData
+  });
+
+  if (!res.ok) throw new Error(await readError(res, "Failed to upload document"));
+  return res.json();
+}
+
+export async function fetchChatDocuments(chatId) {
+  const cId = chatId || "null";
+  const res = await apiCall(`${API_URL}/documents/chat/${cId}`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to fetch documents"));
+  return res.json();
+}
+
+export async function deleteDocument(docId) {
+  const res = await apiCall(`${API_URL}/documents/${docId}`, {
+    method: "DELETE",
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to delete document"));
+  return res.json();
+}
+
+export async function reindexDocument(docId) {
+  const res = await apiCall(`${API_URL}/documents/reindex/${docId}`, {
+    method: "POST",
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to reindex document"));
+  return res.json();
+}
+
+export async function retrieveOfflineCitations(chatId, query) {
+  const cId = chatId || "null";
+  const res = await apiCall(`${API_URL}/documents/chat/${cId}/retrieve?query=${encodeURIComponent(query)}`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to retrieve citations"));
+  return res.json();
+}
+
+export async function exportUserChats() {
+  const res = await apiCall(`${API_URL}/chat/export`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to export chats"));
+  return res.json();
+}
+
+export async function importUserChats(chats) {
+  const res = await apiCall(`${API_URL}/chat/import`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ chats })
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to import chats"));
+  return res.json();
+}
+
+export async function fetchAllDocuments() {
+  const res = await apiCall(`${API_URL}/documents`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw new Error(await readError(res, "Failed to fetch all documents"));
+  return res.json();
+}

@@ -11,22 +11,44 @@ import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chat.js';
+import workspaceRoutes from './routes/workspace.js';
+import documentRoutes from './routes/document.js';
 import { notFound } from './middlewares/notFoundMiddleware.js';
 import { errorHandler } from './middlewares/errorMiddleware.js';
+import { requestLogger } from './middlewares/loggingMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Production Compression & Request Logging
+// Production Compression, Request Tracking & Request Logging
 app.use(compression());
+app.use(requestLogger);
 if (process.env.NODE_ENV !== 'production') {
     app.use(morgan('dev'));
 }
 
-// Security Middlewares
-app.use(helmet({ contentSecurityPolicy: false })); // Disable CSP to avoid blocking frontend assets/APIs
+// Security Middlewares with Customized Content Security Policy
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            connectSrc: [
+                "'self'",
+                "http://localhost:11434",
+                "http://127.0.0.1:11434",
+                "https://generativelanguage.googleapis.com",
+                "https://openrouter.ai",
+                "*"
+            ],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "blob:"],
+            fontSrc: ["'self'", "data:"]
+        }
+    }
+}));
 app.use(mongoSanitize);
 
 const allowedOrigins = [
@@ -56,6 +78,21 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Liveness Endpoint
+app.get('/health/live', (req, res) => {
+    res.status(200).json({ status: 'live', timestamp: new Date().toISOString() });
+});
+
+// Readiness Endpoint
+app.get('/health/ready', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    if (dbState === 1) {
+        return res.status(200).json({ status: 'ready', database: 'connected' });
+    }
+    return res.status(503).json({ status: 'degraded', database: 'disconnected' });
+});
+
+// Global Health Status Check (Orchestrator compatible)
 app.get('/health', (req, res) => {
     const dbState = mongoose.connection.readyState;
     const states = {
@@ -64,7 +101,8 @@ app.get('/health', (req, res) => {
         2: 'connecting',
         3: 'disconnecting',
     };
-    res.json({
+    const statusCode = dbState === 1 ? 200 : 503;
+    res.status(statusCode).json({
         status: dbState === 1 ? 'ok' : 'degraded',
         service: 'ai-chatbot-backend',
         database: states[dbState] || 'unknown',
@@ -74,6 +112,8 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/workspaces', workspaceRoutes);
+app.use('/api/documents', documentRoutes);
 
 // Static file serving for monolith deployment
 if (process.env.NODE_ENV === 'production') {
