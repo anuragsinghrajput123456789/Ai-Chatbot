@@ -118,12 +118,12 @@ Chatterbot combines the security of a backend database proxy with the absolute p
 
 ```mermaid
 graph TD
-    subgraph Client Environment (User's Machine)
+    subgraph "Client Environment (User's Machine)"
         Browser[React SPA Frontend]
         Ollama[Local Ollama Server: Port 11434]
     end
 
-    subgraph Cloud Infrastructure
+    subgraph "Cloud Infrastructure"
         Backend[Express REST API Backend]
         MongoDB[(MongoDB Atlas Database)]
         Gemini[Google Gemini API]
